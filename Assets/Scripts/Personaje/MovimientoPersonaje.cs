@@ -13,7 +13,7 @@ public class MovimientoPersonaje : MonoBehaviour
     InputAction salto;
     PlayerInput playerInput;
     Vector2 direccion;
-    
+
  
     void Start()
     {

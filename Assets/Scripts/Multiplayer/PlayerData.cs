@@ -2,20 +2,21 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Users;
 
+[System.Serializable]
 public class PlayerData
 {
-    public int PlayerIndex;
-    public InputUser User;
-    public PlayerControls Controls; // The Generated C# Class
-    public InputDevice Device;
+    public int playerIndex;
+    public InputUser user;
+    public PlayerControls controls; // The Generated C# Class
+    public InputDevice device;
 
     // Character Selection state
-    public int CharacterID = 0;
-    public bool IsReady = false;
+    public int characterID = 0;
+    public bool isReady = false;
 
     public void Cleanup()
     {
-        Controls.Disable();
-        User.UnpairDevicesAndRemoveUser();
+        controls.Disable();
+        user.UnpairDevicesAndRemoveUser();
     }
 }

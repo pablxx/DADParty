@@ -23,6 +23,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Interact",
+                    "type": "Button",
+                    "id": "516fe6d8-55d9-4bb8-a787-41d10aaf7892",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -122,6 +131,28 @@
                     "processors": "",
                     "groups": ";Keyboard",
                     "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d7b85461-19cc-476b-98e1-6d02a6049183",
+                    "path": "<HID::Generic   USB  Joystick  >/button3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "Interact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7dfb7591-31d9-4973-96a3-2cc08a8e1af9",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard",
+                    "action": "Interact",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
@@ -240,7 +271,18 @@
                 {
                     "name": "",
                     "id": "d2ff4c4a-fd63-48e0-9fa9-ba1222f3151d",
-                    "path": "<HID::Generic   USB  Joystick  >/button2",
+                    "path": "<HID::Microntek              USB Joystick          >/button3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "Confirm",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1ad8ae76-cc12-4614-9f8c-5c5b5ca31616",
+                    "path": "<HID::Generic   USB  Joystick  >/trigger",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",
@@ -292,6 +334,11 @@
                 {
                     "devicePath": "<Gamepad>",
                     "isOptional": false,
+                    "isOR": false
+                },
+                {
+                    "devicePath": "<Joystick>",
+                    "isOptional": true,
                     "isOR": false
                 }
             ]

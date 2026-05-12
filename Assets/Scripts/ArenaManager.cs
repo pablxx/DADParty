@@ -18,6 +18,7 @@ public class ArenaManager : MonoBehaviour
 
     int randomFilas;
     int randomColumnas;
+    public int contadorObjetos = 0;
 
     void Awake()
     {
@@ -155,6 +156,7 @@ public class ArenaManager : MonoBehaviour
                 posicionObjeto[i, j] = 0;
             }
         }
+                posicionInicial.position = new Vector3(-4.5f, 0.6f, 4.5f);
     }
 
     public void devolverObjeto(GameObject obj, int fila, int columna)

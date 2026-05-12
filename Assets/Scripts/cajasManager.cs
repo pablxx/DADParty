@@ -48,7 +48,11 @@ public class cajasManager : MonoBehaviour
         Tomado = false;
 
         aleatorio = Random.Range(1, 10);
-
+        if (aleatorio <= 6) { tipoActual = TipoObjeto.comun; }
+        if (aleatorio == 7) { tipoActual = TipoObjeto.aceite; } 
+        if (aleatorio == 8) { tipoActual = TipoObjeto.llajua; } 
+        if (aleatorio == 9) { tipoActual = TipoObjeto.miel; } 
+     
         if (aleatorio <= 6)
         {
             tipoActual = TipoObjeto.comun;
@@ -57,17 +61,17 @@ public class cajasManager : MonoBehaviour
         if (aleatorio == 7)
         {
             tipoActual = TipoObjeto.aceite;
-        }
+    }
 
         if (aleatorio == 8)
-        {
+    {
             tipoActual = TipoObjeto.llajua;
         }
-
+        
         if (aleatorio == 9)
         {
             tipoActual = TipoObjeto.miel;
-        }
+    }
 
         switch (tipoActual)
         {
@@ -104,8 +108,8 @@ public class cajasManager : MonoBehaviour
             return;
         }
 
-        if (collision.gameObject.CompareTag("Piso"))
-        {
+            if (collision.gameObject.CompareTag("Piso"))
+            {
             Rigidbody rb = GetComponent<Rigidbody>();
 
             rb.linearVelocity = Vector3.zero;
@@ -121,7 +125,7 @@ public class cajasManager : MonoBehaviour
                 filaCaja,
                 columnaCaja
             );
-        }
+            }
 
         if (collision.gameObject.CompareTag("Jugador"))
         {
@@ -154,6 +158,6 @@ public class cajasManager : MonoBehaviour
                 filaCaja,
                 columnaCaja
             );
-        }
+        }       
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -5,47 +6,64 @@ using UnityEngine.UI;
 
 public class CharacterSlotUI : MonoBehaviour
 {
-    public int SlotIndex;
+    public int slotIndex;
     public TextMeshProUGUI statusText;
-    private PlayerData myData;
+    private PlayerData playerData;
+    public bool isOccupied = false;     
+    private bool isReady = false;
 
-    public void AssignPlayer(PlayerData data)
+    public Image selectedImage;
+
+    public void SetOccupied(PlayerData playerData)
     {
-        myData = data;
-        statusText.text = "P" + (data.PlayerIndex + 1) + " Select Character";
-
-        // asignar los eventos de input a este jugador
-        myData.Controls.UI.Navigate.performed += ctx => OnNavigate(ctx.ReadValue<Vector2>());
-        myData.Controls.UI.Confirm.performed += ctx => OnConfirm();
+        isOccupied = true;
+        isReady = false;
+        selectedImage.color = Color.red;
+        this.playerData = playerData;
+        
+        if (statusText != null)
+        {
+            statusText.text = $"P{playerData.playerIndex + 1}";
+        }
     }
 
-    void OnNavigate(Vector2 dir)
+    public void SetFree()
     {
-        if (myData.IsReady) return;
-
-        if (dir.x > 0.5f) myData.CharacterID++;
-        if (dir.x < -0.5f) myData.CharacterID--;
-
-        // actualizar la ui
+        isOccupied = false;
+        isReady = false;
+        selectedImage.color = Color.white;
+        playerData = null;
+        
+        if (statusText != null)
+        {
+            statusText.text = "";
+        }
     }
 
-    void OnConfirm()
+    public void SetReady(bool ready)
     {
-        myData.IsReady = true;
-        statusText.text = "READY!";
-
-        // verificamos antes de iniciar que todos esten listos
-        bool allReady = true;
-        foreach (var player in LobbyManager.Instance.playerList)
+        isReady = ready;
+        
+        if (ready)
         {
-            if (!player.IsReady) allReady = false;
+            selectedImage.color = Color.green; // Verde = listo
+            if (statusText != null)
+            {
+                statusText.text = $"P{playerData.playerIndex + 1} - ¡LISTO!";
+            }
         }
-
-        if (allReady && LobbyManager.Instance.playerList.Count > 0)
+        else
         {
-            //idealmente aqui esperamos un rato antes de que alguien se eche atras
-            Debug.Log("listos, iniciando");
-            SceneManager.LoadScene("GameScene");
+            selectedImage.color = Color.red; // Rojo = eligiendo
+            if (statusText != null)
+            {
+                statusText.text = $"P{playerData.playerIndex + 1}";
+            }
         }
+    }
+
+    public PlayerData GetPlayerData()
+    {
+        return playerData;
     }
 }

@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1178706666165279994
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8964433340146160845}
+  m_Layer: 0
+  m_Name: Mano
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8964433340146160845
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1178706666165279994}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.024, z: -0.032633364}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4202125402188786062}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2850114504840234059
 GameObject:
   m_ObjectHideFlags: 0
@@ -13,6 +44,7 @@ GameObject:
   - component: {fileID: 5491327938955876987}
   - component: {fileID: 4356674462285126925}
   - component: {fileID: 6537484184072544596}
+  - component: {fileID: 7203909783772352787}
   - component: {fileID: 8662681800688095244}
   m_Layer: 0
   m_Name: PlayerBase
@@ -35,6 +67,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3689918673726922273}
+  - {fileID: 8964433340146160845}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &5871835281162659819
@@ -138,6 +171,24 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &7203909783772352787
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2850114504840234059}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c8a91aab69b42543aaf8b6c30f58864, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  distanciaDeteccion: 1
+  fuerzaLanzamiento: 55
+  puntoMano: {fileID: 8964433340146160845}
+  caja: {fileID: 0}
+  objetoDetectado: {fileID: 0}
+  sujetando: 0
 --- !u!114 &8662681800688095244
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -152,6 +203,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 5
   rotationSpeed: 720
+  interaccionBash: {fileID: 7203909783772352787}
 --- !u!1 &8688994684276352678
 GameObject:
   m_ObjectHideFlags: 0

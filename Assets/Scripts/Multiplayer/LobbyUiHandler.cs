@@ -14,14 +14,19 @@ public class LobbyUIHandler : MonoBehaviour
         else Destroy(gameObject);
     }
 
+    
+
     // el manager lo usa cuando se ha unido un jugador
     public void OnPlayerJoined(PlayerData data)
     {
         // no unir mas jugadores de los permitidos
-        if (data.PlayerIndex < playerSlots.Count)
+        if (data.playerIndex < playerSlots.Count)
         {
             // ese slot se asigna al jugador
-            playerSlots[data.PlayerIndex].AssignPlayer(data);
-        }
+            //playerSlots[data.playerIndex].AssignPlayer(data);
+            playerSlots[data.playerIndex].SetOccupied(data);
+        }   
     }
+
+    
 }

@@ -10,22 +10,32 @@ public class PlayerController : MonoBehaviour
 
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
-    public float rotationSpeed = 720f; // velocidad de rotación en grados por segundo
+    public float rotationSpeed = 720f;
 
     private Vector3 currentVelocity;
     private float gravity = -9.81f;
+
+    [SerializeField] InteraccionBash interaccionBash;
 
     public void Initialize(PlayerData data)
     {
         playerData = data;
         controller = GetComponent<CharacterController>();
 
+        // IMPORTANTE: Activar el mapa Player y desactivar UI
+        playerData.controls.UI.Disable();
+        playerData.controls.Player.Enable();
+
+        Debug.Log($"Player {playerData.playerIndex} controles Player activados");
+
         // vincular la accion de movimiento
-        playerData.Controls.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
-        playerData.Controls.Player.Move.canceled += ctx => moveInput = Vector2.zero;
+        playerData.controls.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
+        playerData.controls.Player.Move.canceled += ctx => moveInput = Vector2.zero;
 
         // vincular la accion de salto
-        playerData.Controls.Player.Jump.performed += ctx => OnJump();
+        playerData.controls.Player.Jump.performed += ctx => OnJump();
+
+        playerData.controls.Player.Interact.performed += ctx => OnInteract();
     }
 
     void Update()
@@ -38,35 +48,26 @@ public class PlayerController : MonoBehaviour
 
     void HandleMovement()
     {
-        // convertir la entrada xy en vector3
         Vector3 moveDirection = new Vector3(moveInput.x, 0, moveInput.y);
 
-        // aplicar gravedad al controller
         if (controller.isGrounded && currentVelocity.y < 0)
         {
             currentVelocity.y = -2f;
         }
 
-        // mover con gravedad y no simplemente
         controller.Move(moveDirection * moveSpeed * Time.deltaTime);
 
-        // aplicar gravedad
         currentVelocity.y += gravity * Time.deltaTime;
         controller.Move(currentVelocity * Time.deltaTime);
     }
 
     void HandleRotation()
     {
-        // solo rotar al jugador si se ha presionado algo
         if (moveInput.sqrMagnitude > 0.01f)
         {
-            // calcular hacia donde quieres ver
             Vector3 targetDirection = new Vector3(moveInput.x, 0, moveInput.y);
-
-            // crear la rotacion objetivo
             Quaternion targetRotation = Quaternion.LookRotation(targetDirection);
 
-            // interpolar la rotacion actual hacia la rotacion objetivo
             transform.rotation = Quaternion.RotateTowards(
                 transform.rotation,
                 targetRotation,
@@ -79,7 +80,24 @@ public class PlayerController : MonoBehaviour
     {
         if (controller.isGrounded)
         {
-            currentVelocity.y = 5f; // fuerza de salto
+            currentVelocity.y = 5f;
+        }
+    }
+
+    void OnInteract()
+    {
+        interaccionBash.Interactuar();
+    }
+
+    void OnDestroy()
+    {
+        // Limpiar eventos cuando se destruya el objeto
+        if (playerData != null && playerData.controls != null)
+        {
+            playerData.controls.Player.Move.performed -= ctx => moveInput = ctx.ReadValue<Vector2>();
+            playerData.controls.Player.Move.canceled -= ctx => moveInput = Vector2.zero;
+            playerData.controls.Player.Jump.performed -= ctx => OnJump();
+            playerData.controls.Player.Interact.performed -= ctx => OnInteract();
         }
     }
 }
