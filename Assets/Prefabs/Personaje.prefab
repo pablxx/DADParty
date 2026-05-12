@@ -235,9 +235,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TamanioRay: 1
-  fuerzaLanzamiento: 15
+  fuerzaLanzamiento: 50
   puntoMano: {fileID: 2644795954490503573}
-  gravedadCajas: 50
   IDjugador: 0
 --- !u!114 &8148736100569568195
 MonoBehaviour:

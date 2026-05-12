@@ -1,19 +1,23 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ArenaManager : MonoBehaviour
 {
     public static ArenaManager Instancia;
 
-    [SerializeField] GameObject Item;
+    [SerializeField] GameObject itemPrefab;
     [SerializeField] int filas;
     [SerializeField] int columnas;
-    [SerializeField] int separacion;
-    [SerializeField] int limiteObjetos;
+    [SerializeField] float separacion;
+    [SerializeField] int cantidadPool;
     [SerializeField] Transform posicionInicial;
+
     public int[,] posicionObjeto;
+
+    List<GameObject> pool = new List<GameObject>();
+
     int randomFilas;
     int randomColumnas;
-    public int contadorObjetos = 0;
 
     void Awake()
     {
@@ -22,21 +26,128 @@ public class ArenaManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
         Instancia = this;
     }
+
     void Start()
     {
-        posicionObjeto = new int [filas,columnas];
+        posicionObjeto = new int[filas, columnas];
+
         reiniciarMatriz();
+
+        crearPool();
+
+        generarObjetosIniciales();
     }
 
-    
-    void Update()
+    void crearPool()
     {
-        generarObjetos();
+        for (int i = 0; i < cantidadPool; i++)
+        {
+            GameObject obj = Instantiate(itemPrefab);
+
+            obj.SetActive(false);
+
+            pool.Add(obj);
+        }
     }
 
-    void reiniciarMatriz() {
+    GameObject obtenerObjetoPool()
+    {
+        for (int i = 0; i < pool.Count; i++)
+        {
+            if (!pool[i].activeInHierarchy)
+            {
+                return pool[i];
+            }
+        }
+
+        return null;
+    }
+
+    void generarObjetosIniciales()
+    {
+        for (int i = 0; i < cantidadPool; i++)
+        {
+            generarObjeto();
+        }
+    }
+
+    public void generarObjeto()
+    {
+        if (generarPosicionAleatoria())
+        {
+            GameObject caja = obtenerObjetoPool();
+
+            if (caja != null)
+            {
+                Vector3 posicion = new Vector3(
+                    posicionInicial.position.x + (separacion * randomColumnas),
+                    posicionInicial.position.y,
+                    posicionInicial.position.z - (separacion * randomFilas)
+                );
+
+                caja.transform.position = posicion;
+
+                caja.transform.rotation = Quaternion.identity;
+
+                Rigidbody rb = caja.GetComponent<Rigidbody>();
+
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+
+                rb.useGravity = true;
+                rb.isKinematic = false;
+
+                cajasManager scriptCaja = caja.GetComponent<cajasManager>();
+
+                scriptCaja.filaCaja = randomFilas;
+                scriptCaja.columnaCaja = randomColumnas;
+
+                scriptCaja.reiniciarCaja();
+
+                posicionObjeto[randomFilas, randomColumnas] = 2;
+
+                caja.SetActive(true);
+
+                rb.linearVelocity = Vector3.zero;
+
+                rb.angularVelocity = Vector3.zero;
+
+                rb.useGravity = true;
+
+                rb.isKinematic = false;
+
+                caja.transform.rotation = Quaternion.identity;
+            }
+        }
+    }
+
+    bool generarPosicionAleatoria()
+    {
+        int intentos = 0;
+
+        while (intentos < 100)
+        {
+            randomFilas = Random.Range(0, filas);
+            randomColumnas = Random.Range(0, columnas);
+
+            if (posicionObjeto[randomFilas, randomColumnas] == 0)
+            {
+                posicionObjeto[randomFilas, randomColumnas] = 1;
+
+                return true;
+            }
+
+            intentos++;
+        }
+
+        return false;
+    }
+
+    void reiniciarMatriz()
+    {
         for (int i = 0; i < filas; i++)
         {
             for (int j = 0; j < columnas; j++)
@@ -45,40 +156,20 @@ public class ArenaManager : MonoBehaviour
             }
         }
     }
-    bool generarPosicionAleatoria() {
-        
-        randomFilas = Random.Range(0, filas);
-        randomColumnas = Random.Range(0, columnas);
-        if (posicionObjeto[randomFilas,randomColumnas] == 0 )
-        {
-            posicionObjeto[randomFilas, randomColumnas] = 1;
-            return true;
-        }
-        return false;
-    }
 
-    void generarObjetos() {
-        if (contadorObjetos < limiteObjetos) {
-            if (generarPosicionAleatoria() == true) {
-                contadorObjetos++;
-                Debug.Log("contador objetos " + contadorObjetos);
-                for (int i = 0; i < filas; i++)
-                {
-                    for (int j = 0; j < columnas; j++)
-                    {
-                        if (posicionObjeto[i, j] == 1)
-                        {
-                            posicionInicial.position = new Vector3(posicionInicial.position.x + (separacion) * j, posicionInicial.position.y, posicionInicial.position.z - (separacion) * i);
-                            GameObject caja = Instantiate(Item, posicionInicial.position, posicionInicial.rotation);
-                            caja.gameObject.GetComponent<cajasManager>().filaCaja = i;
-                            caja.gameObject.GetComponent<cajasManager>().columnaCaja = j;
-                            posicionObjeto[i, j] = 2;
-                        }
-                    }
-                }
-                posicionInicial.position = new Vector3(-4.5f, 0.6f, 4.5f);
-            }
-            
-        }
+    public void devolverObjeto(GameObject obj, int fila, int columna)
+    {
+        posicionObjeto[fila, columna] = 0;
+
+        Rigidbody rb = obj.GetComponent<Rigidbody>();
+
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+
+        obj.transform.rotation = Quaternion.identity;
+
+        obj.SetActive(false);
+
+        generarObjeto();
     }
 }

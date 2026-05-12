@@ -105,6 +105,7 @@ MonoBehaviour:
   columnaCaja: 0
   tipoActual: 0
   Tomado: 0
+  IDJugador: 0
 --- !u!65 &954790968910206659
 BoxCollider:
   m_ObjectHideFlags: 0

@@ -1,18 +1,19 @@
-using System;
-using UnityEngine;
+    using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections;
 
 public class Interaccion : MonoBehaviour
 {
     [SerializeField] float TamanioRay;
-    [SerializeField] float fuerzaLanzamiento;
-    [SerializeField] Transform puntoMano;
-    [SerializeField] float gravedadCajas;
 
-    Vector3 velocidadActualCaja;
-    bool enVuelo = false;
+    [SerializeField] float fuerzaLanzamiento;
+
+    [SerializeField] Transform puntoMano;
+
     public int IDjugador;
+
     private PlayerInput playerInput;
+
     private InputAction accionAgarrar;
 
     GameObject caja;
@@ -22,7 +23,9 @@ public class Interaccion : MonoBehaviour
     private void Awake()
     {
         playerInput = GetComponent<PlayerInput>();
-        accionAgarrar = playerInput.actions["Agarrar"];
+
+        accionAgarrar =
+            playerInput.actions["Agarrar"];
     }
 
     void Update()
@@ -33,35 +36,41 @@ public class Interaccion : MonoBehaviour
             {
                 detectarObjeto();
             }
-            else {
-                lanzarObjeto();
-            }          
-        }
-
-        if (enVuelo && caja != null)
-        {
-            velocidadActualCaja.y -= gravedadCajas * Time.deltaTime;
-            caja.transform.position += velocidadActualCaja * Time.deltaTime;
-            caja.transform.Rotate(Vector3.right * 2050f * Time.deltaTime);
-            if (caja.transform.position.y <= 0.05f)
+            else
             {
-                enVuelo = false;
-                caja = null;
+                lanzarObjeto();
             }
         }
     }
 
     void detectarObjeto()
     {
-        Vector3 origen = transform.position + new Vector3(0, -0.2f, 0);
+        Vector3 origen =
+            transform.position + new Vector3(0, -0.2f, 0);
+
         Vector3 direccion = transform.forward;
+
         RaycastHit hit;
-        Debug.DrawRay(origen, direccion * TamanioRay, Color.red, 2f); 
-        if (Physics.Raycast(origen, direccion, out hit, TamanioRay))
+
+        Debug.DrawRay(
+            origen,
+            direccion * TamanioRay,
+            Color.red,
+            2f
+        );
+
+        if (Physics.Raycast(
+            origen,
+            direccion,
+            out hit,
+            TamanioRay))
         {
             if (hit.collider.CompareTag("Arrojable"))
             {
-                LevantarObjeto(hit.collider.gameObject);
+                LevantarObjeto(
+                    hit.collider.gameObject
+                );
+
                 Sujetar = true;
             }
         }
@@ -69,27 +78,80 @@ public class Interaccion : MonoBehaviour
 
     void LevantarObjeto(GameObject objetoDetectado)
     {
-        enVuelo = false;
         caja = objetoDetectado;
-        int filCaja = caja.gameObject.GetComponent<cajasManager>().filaCaja;
-        int colCaja = caja.gameObject.GetComponent<cajasManager>().columnaCaja;
-        caja.gameObject.GetComponent<cajasManager>().Tomado = true;
-        ArenaManager.Instancia.posicionObjeto[filCaja,colCaja] = 0;
+
+        int filCaja =
+            caja.GetComponent<cajasManager>().filaCaja;
+
+        int colCaja =
+            caja.GetComponent<cajasManager>().columnaCaja;
+
+        caja.GetComponent<cajasManager>().Tomado = true;
+
+        ArenaManager.Instancia.posicionObjeto[
+            filCaja,
+            colCaja
+        ] = 0;
+
         caja.transform.position = puntoMano.position;
+
         caja.transform.SetParent(puntoMano);
-        caja.gameObject.GetComponent<Rigidbody>().useGravity = false;
-        caja.gameObject.GetComponent<Rigidbody>().isKinematic = true;
+
+        Rigidbody rb = caja.GetComponent<Rigidbody>();
+
+        rb.linearVelocity = Vector3.zero;
+
+        rb.angularVelocity = Vector3.zero;
+
+        rb.useGravity = false;
+
+        rb.isKinematic = true;
+
+        caja.GetComponent<Collider>().enabled = false;
+        caja.GetComponent<cajasManager>().rotando = false;
     }
 
     void lanzarObjeto()
     {
         caja.transform.SetParent(null);
-        caja.gameObject.GetComponent<Rigidbody>().isKinematic = false;
-        Vector3 direccion = (transform.forward + Vector3.up * 0.6f).normalized;
-        velocidadActualCaja = direccion * fuerzaLanzamiento;
-        enVuelo = true; 
+
+        Rigidbody rb = caja.GetComponent<Rigidbody>();
+
+        rb.isKinematic = false;
+
+        rb.useGravity = true;
+
+        rb.linearVelocity = Vector3.zero;
+
+        rb.angularVelocity = Vector3.zero;
+
+        Vector3 direccion =
+            (transform.forward + Vector3.up * 0.5f)
+            .normalized;
+
+        StartCoroutine(
+            activarColliderDespues(caja)
+        );
+
+        rb.AddForce(
+            direccion * fuerzaLanzamiento,
+            ForceMode.Impulse
+        );
+
         Sujetar = false;
-        ArenaManager.Instancia.contadorObjetos--;
+
+        caja = null;
+
+        caja.GetComponent<cajasManager>().rotando = true;
     }
 
+    IEnumerator activarColliderDespues(GameObject obj)
+    {
+        yield return new WaitForSeconds(0.15f);
+
+        if (obj != null)
+        {
+            obj.GetComponent<Collider>().enabled = true;
+        }
+    }
 }
