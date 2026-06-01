@@ -6,13 +6,13 @@ public class LimiteArena : MonoBehaviour
     {
         if (other.CompareTag("Arrojable"))
         {
-            cajasManager caja = other.GetComponent<cajasManager>();
+            /*cajasManager caja = other.GetComponent<cajasManager>();
 
             ArenaManager.Instancia.devolverObjeto(
                 other.gameObject,
                 caja.filaCaja,
                 caja.columnaCaja
-            );
+            );*/
         }
     }
 }

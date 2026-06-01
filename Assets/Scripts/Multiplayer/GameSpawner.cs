@@ -7,7 +7,7 @@ public class GameSpawner : MonoBehaviour
 
     void Start()
     {
-        var players = LobbyManager.Instance.playerList;
+        var players = LobbyManager1.Instance.playerList;
 
         for (int i = 0; i < players.Count; i++)
         {

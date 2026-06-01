@@ -3,91 +3,85 @@ using UnityEngine.InputSystem;
 
 public class Spawn : MonoBehaviour
 {
-    [SerializeField] private Transform[] puntosDeSpawn;
+    [SerializeField]
+    Transform[] puntosDeSpawn;  
+    [SerializeField]
+    Color colorJ1 = Color.blue;
+    [SerializeField]
+    Color colorJ2 = Color.red;
+    [SerializeField]
+    Color colorJ3 = Color.green;
+    [SerializeField]
+    Color colorJ4 = Color.yellow;
 
-    private int contadorJugadores = 0;
-
-    [SerializeField] Color colorJ1 = Color.blue;
-    [SerializeField] Color colorJ2 = Color.red;
-    [SerializeField] Color colorJ3 = Color.green;
-
-    private PlayerInputManager manager;
-
-    GameObject[] jugadores;
-
+    PlayerInputManager manager;
+    int contadorJugadores = 0;
     private void Awake()
     {
         manager = GetComponent<PlayerInputManager>();
 
-        jugadores = new GameObject[puntosDeSpawn.Length];
-    }
-
-    private void Update()
-    {
-        if (Keyboard.current.enterKey.wasPressedThisFrame && contadorJugadores == 1)
+        if (GestorVictorias.Instancia != null)
         {
-            manager.JoinPlayer(
-                pairWithDevice: Keyboard.current,
-                controlScheme: "Teclado2"
-            );
-        }
-
-        if (contadorJugadores >= 2 && Gamepad.all.Count > 0)
-        {
-            if (Gamepad.current.buttonSouth.wasPressedThisFrame)
+            if (GestorVictorias.Instancia.ObtenerCantidadJugadoresRegistrados() > 0)
             {
-                manager.JoinPlayer(
-                    pairWithDevice: Gamepad.current,
-                    controlScheme: "Joystick"
-                );
+                PlayerInputManager gestorManager = GetComponent<PlayerInputManager>();
+                if (gestorManager != null)
+                {
+                    gestorManager.enabled = false;
+                }
+                Destroy(gameObject);
             }
         }
     }
 
+    private void OnEnable()
+    {
+        if (manager != null)
+        {
+            manager.onPlayerJoined += OnPlayerJoined;
+        }
+    }
+    private void OnDisable()
+    {
+        if (manager != null)
+        {
+            manager.onPlayerJoined -= OnPlayerJoined;
+        }
+    }
     public void OnPlayerJoined(PlayerInput nuevoJugador)
     {
         if (contadorJugadores < puntosDeSpawn.Length)
         {
-            nuevoJugador.transform.position =
-                puntosDeSpawn[contadorJugadores].position;
-
-            jugadores[contadorJugadores] = nuevoJugador.gameObject;
-
-            var datos = nuevoJugador.GetComponent<Interaccion>();
-
+            nuevoJugador.transform.position = puntosDeSpawn[contadorJugadores].position;
+            Interaccion datos = nuevoJugador.GetComponent<Interaccion>();
             if (datos != null)
             {
                 datos.IDjugador = contadorJugadores + 1;
             }
-
-            MeshRenderer renderer =
-                nuevoJugador.GetComponent<MeshRenderer>();
-
+            MeshRenderer renderer = nuevoJugador.GetComponent<MeshRenderer>();
             if (renderer != null)
             {
                 switch (contadorJugadores)
                 {
                     case 0:
-                        renderer.material.color = colorJ1;
-                        break;
-
+                        renderer.material.color = colorJ1; break;
                     case 1:
-                        renderer.material.color = colorJ2;
-                        break;
-
+                        renderer.material.color = colorJ2; break;
                     case 2:
-                        renderer.material.color = colorJ3;
+                        renderer.material.color = colorJ3; break;
+                    case 3:
+                        renderer.material.color = colorJ4; break;
+                    default:
                         break;
                 }
             }
-
-            contadorJugadores++;
-
-            SaludManager.Instancia.inicializarJugadores(jugadores);
+            int numeroJugadorAnuncio = contadorJugadores + 1;
+            Debug.Log("Jugador " + numeroJugadorAnuncio + " conectado usando: " + nuevoJugador.currentControlScheme + " (" + nuevoJugador.devices[0].name + ")!");
+            contadorJugadores = contadorJugadores + 1;
         }
         else
         {
-            Debug.LogWarning("¡No hay suficientes puntos de spawn!");
+            Debug.LogWarning("Intento de unión rechazado: No hay suficientes puntos de spawn");
         }
     }
 }

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7440828045765653410}
   - component: {fileID: 7512135885061789510}
   - component: {fileID: 3108198436653531623}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: ojos
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -49,7 +49,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4718721694969427161}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -104,7 +104,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Size: {x: 0.9999999, y: 0.9999999, z: 0.9999999}
   m_Center: {x: 0, y: 0, z: 0}
@@ -117,14 +117,17 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1041330506138823894}
+  - component: {fileID: -1196111180471176216}
+  - component: {fileID: -1351762949302874236}
+  - component: {fileID: -8414437313536857838}
   - component: {fileID: 3107253236278301725}
   - component: {fileID: 7856582687689369919}
   - component: {fileID: 5335351164998263101}
   - component: {fileID: 6550636757103084075}
   - component: {fileID: 8148736100569568195}
-  - component: {fileID: 6846047663660955392}
   - component: {fileID: 4878308155600715541}
-  m_Layer: 0
+  - component: {fileID: 2171864878110652643}
+  m_Layer: 3
   m_Name: Personaje
   m_TagString: Jugador
   m_Icon: {fileID: 0}
@@ -140,7 +143,7 @@ Transform:
   m_GameObject: {fileID: 6854074635630707149}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.02, y: 1.86, z: 0.0077183917}
+  m_LocalPosition: {x: 0.02, y: 2.97, z: 0.0077183917}
   m_LocalScale: {x: 0.5696425, y: 1.1548362, z: 0.5696425}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -148,6 +151,43 @@ Transform:
   - {fileID: 2644795954490503573}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-1196111180471176216
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6854074635630707149}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f46e1ab2f5bfb4e4091161671771cd49, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  idJugador: 0
+--- !u!114 &-1351762949302874236
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6854074635630707149}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bcb9670bba4e02c45bd3fb1535dcafb0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &-8414437313536857838
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6854074635630707149}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4792f111510dfe84c9d7e7517290a58e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!33 &3107253236278301725
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -163,7 +203,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6854074635630707149}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -218,7 +258,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -235,8 +275,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TamanioRay: 1
-  fuerzaLanzamiento: 50
+  fuerzaLanzamiento: 10
   puntoMano: {fileID: 2644795954490503573}
+  gravedadCajas: 40
+  capasImpactoCaja:
+    serializedVersion: 2
+    m_Bits: 72
+  prefabCharcoMiel: {fileID: 0}
   IDjugador: 0
 --- !u!114 &8148736100569568195
 MonoBehaviour:
@@ -245,41 +290,15 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6854074635630707149}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7e89c21d2d64bf2488919f429016a86c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   velocidad: 5
   fuerzaSalto: 5
-  velocidadRotacion: 8
---- !u!54 &6846047663660955392
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6854074635630707149}
-  serializedVersion: 4
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 80
-  m_CollisionDetection: 0
+  velocidadRotacion: 15
+  gravity: 20
 --- !u!114 &4878308155600715541
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -307,9 +326,34 @@ MonoBehaviour:
   m_ActionEvents: []
   m_NeverAutoSwitchControlSchemes: 1
   m_DefaultControlScheme: 
-  m_DefaultActionMap: Player
+  m_DefaultActionMap: UI
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!143 &2171864878110652643
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6854074635630707149}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Height: 1.12
+  m_Radius: 0.54
+  m_SlopeLimit: 100
+  m_StepOffset: 0
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0.06, z: 0}
 --- !u!1 &7800623613940820199
 GameObject:
   m_ObjectHideFlags: 0
@@ -319,7 +363,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2644795954490503573}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: mano
   m_TagString: Untagged
   m_Icon: {fileID: 3443629218296621865, guid: 0000000000000000d000000000000000, type: 0}

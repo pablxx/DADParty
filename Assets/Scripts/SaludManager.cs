@@ -1,26 +1,21 @@
+﻿using System.Collections.Generic;
 using UnityEngine;
-using System.Collections.Generic;
-using System.Linq;
 
 public class SaludManager : MonoBehaviour
 {
     public static SaludManager Instancia;
 
-    [SerializeField] float saludInicial = 100f;
+    [System.Serializable]
+    public class DatosJugador
+    {
+        public int idJugador;
+        public float saludMaxima = 100f;
+        public float saludActual;
+        public bool estaMuerto = false;
+        public MovimientoPersonaje scriptMovimiento;
+    }
 
-    public float[] saludJugadores;
-
-    GameObject[] jugadores;
-
-    [SerializeField] Transform podioPrimerLugar;
-    [SerializeField] Transform podioSegundoLugar;
-    [SerializeField] Transform podioTercerLugar;
-
-    int jugadoresVivos;
-
-    int ordenEliminacion = 0;
-
-    bool partidaTerminada = false;
+    [SerializeField] private List<DatosJugador> listaJugadores = new List<DatosJugador>();
 
     void Awake()
     {
@@ -29,210 +24,210 @@ public class SaludManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-
         Instancia = this;
     }
 
-    public void inicializarJugadores(GameObject[] jugadoresActuales)
+    void Start()
     {
-        jugadores = jugadoresActuales;
-
-        saludJugadores = new float[jugadores.Length];
-
-        jugadoresVivos = jugadores.Length;
-
-        for (int i = 0; i < saludJugadores.Length; i++)
+        for (int i = 0; i < listaJugadores.Count; i++)
         {
-            saludJugadores[i] = saludInicial;
+            if (listaJugadores[i] != null)
+            {
+                listaJugadores[i].saludActual = listaJugadores[i].saludMaxima;
+                listaJugadores[i].estaMuerto = false;
+            }
+        }
+    }
+    private static int CompararPorID(DatosJugador x, DatosJugador y)
+    {
+        if (x == null && y == null) return 0;
+        if (x == null) return -1;
+        if (y == null) return 1;
+        return x.idJugador.CompareTo(y.idJugador);
+    }
+
+    public void RegistrarJugadorEnArena(int id, MovimientoPersonaje scriptMov)
+    {
+        bool existeJugador = false;
+        for (int i = 0; i < listaJugadores.Count; i++)
+        {
+            if (listaJugadores[i] != null)
+            {
+                if (listaJugadores[i].idJugador == id)
+                {
+                    existeJugador = true;
+                    break;
+                }
+            }
+        }
+        if (existeJugador == false)
+        {
+            DatosJugador nuevoJugador = new DatosJugador();
+            nuevoJugador.idJugador = id;
+            nuevoJugador.scriptMovimiento = scriptMov;
+            nuevoJugador.saludActual = nuevoJugador.saludMaxima;
+            nuevoJugador.estaMuerto = false;
+            listaJugadores.Add(nuevoJugador);
+            listaJugadores.Sort(CompararPorID);
         }
     }
 
     public void ActualizarSalud(int IDJugador, int Danio)
     {
-        int indice = IDJugador - 1;
-
-        if (indice >= 0 && indice < saludJugadores.Length)
+        DatosJugador jugadorAfectado = null;
+        for (int i = 0; i < listaJugadores.Count; i++)
         {
-            if (saludJugadores[indice] <= 0)
+            if (listaJugadores[i] != null)
             {
-                return;
-            }
-
-            saludJugadores[indice] -= Danio;
-
-            if (saludJugadores[indice] < 0)
-            {
-                saludJugadores[indice] = 0;
-            }
-
-            Debug.Log(
-                "Jugador " +
-                IDJugador +
-                " Salud: " +
-                saludJugadores[indice]
-            );
-
-            if (saludJugadores[indice] <= 0)
-            {
-                eliminarJugador(indice);
-            }
-        }
-    }
-
-    void eliminarJugador(int indice)
-    {
-        jugadoresVivos--;
-
-        GameObject jugador = jugadores[indice];
-
-        Transform lugarPodio = obtenerLugarEliminacion();
-
-        jugador.transform.position = lugarPodio.position;
-
-        jugador.transform.rotation = lugarPodio.rotation;
-
-        Interaccion interaccion =
-            jugador.GetComponent<Interaccion>();
-
-        if (interaccion != null)
-        {
-            interaccion.enabled = false;
-        }
-
-        Rigidbody rb = jugador.GetComponent<Rigidbody>();
-
-        if (rb != null)
-        {
-            rb.linearVelocity = Vector3.zero;
-
-            rb.angularVelocity = Vector3.zero;
-
-            rb.constraints = RigidbodyConstraints.FreezeAll;
-        }
-
-        ordenEliminacion++;
-
-        if (jugadoresVivos <= 1 && !partidaTerminada)
-        {
-            partidaTerminada = true;
-
-            colocarGanadorPrimerLugar();
-
-            CanvasManager.Instancia.finalizarPartida();
-        }
-    }
-
-    Transform obtenerLugarEliminacion()
-    {
-        if (ordenEliminacion == 0)
-        {
-            return podioTercerLugar;
-        }
-
-        return podioSegundoLugar;
-    }
-
-    void colocarGanadorPrimerLugar()
-    {
-        for (int i = 0; i < saludJugadores.Length; i++)
-        {
-            if (saludJugadores[i] > 0)
-            {
-                GameObject jugador = jugadores[i];
-
-                jugador.transform.position =
-                    podioPrimerLugar.position;
-
-                jugador.transform.rotation =
-                    podioPrimerLugar.rotation;
-
-                Rigidbody rb =
-                    jugador.GetComponent<Rigidbody>();
-
-                if (rb != null)
+                if (listaJugadores[i].idJugador == IDJugador)
                 {
-                    rb.linearVelocity = Vector3.zero;
-
-                    rb.angularVelocity = Vector3.zero;
-
-                    rb.constraints =
-                        RigidbodyConstraints.FreezeAll;
+                    jugadorAfectado = listaJugadores[i];
+                    break;
+                }
+            }
+        }
+        if (jugadorAfectado != null)
+        {
+            if (jugadorAfectado.estaMuerto == false)
+            {
+                jugadorAfectado.saludActual = jugadorAfectado.saludActual - Danio;
+                jugadorAfectado.saludActual = Mathf.Clamp(jugadorAfectado.saludActual, 0f, jugadorAfectado.saludMaxima);
+                if (CanvasManager.Instancia != null)
+                {
+                    CanvasManager.Instancia.actualizarBarraVida(IDJugador);
+                }
+                if (jugadorAfectado.saludActual <= 0f)
+                {
+                    ManejarMuerteJugador(jugadorAfectado);
+                    VerificarCondicionVictoria();
                 }
             }
         }
     }
 
-    public void ordenarPorVida()
+    public void CurarSalud(int IDJugador, int cantidadCura)
     {
-        List<int> indicesOrdenados =
-            Enumerable.Range(0, saludJugadores.Length)
-            .Where(i => jugadores[i] != null)
-            .OrderByDescending(i => saludJugadores[i])
-            .ToList();
-
-        for (int posicion = 0;
-            posicion < indicesOrdenados.Count;
-            posicion++)
+        DatosJugador jugadorAfectado = null;
+        for (int i = 0; i < listaJugadores.Count; i++)
         {
-            int indiceJugador =
-                indicesOrdenados[posicion];
-
-            GameObject jugador =
-                jugadores[indiceJugador];
-
-            if (jugador == null)
+            if (listaJugadores[i] != null)
             {
-                continue;
+                if (listaJugadores[i].idJugador == IDJugador)
+                {
+                    jugadorAfectado = listaJugadores[i];
+                    break;
+                }
             }
-
-            Transform destino =
-                obtenerTransformPodio(posicion);
-
-            jugador.transform.position =
-                destino.position;
-
-            jugador.transform.rotation =
-                destino.rotation;
-
-            Rigidbody rb =
-                jugador.GetComponent<Rigidbody>();
-
-            if (rb != null)
+        }
+        if (jugadorAfectado != null)
+        {
+            if (jugadorAfectado.estaMuerto == false)
             {
-                rb.linearVelocity = Vector3.zero;
-
-                rb.angularVelocity = Vector3.zero;
-
-                rb.constraints =
-                    RigidbodyConstraints.FreezeAll;
+                jugadorAfectado.saludActual = jugadorAfectado.saludActual + cantidadCura;
+                jugadorAfectado.saludActual = Mathf.Clamp(jugadorAfectado.saludActual, 0f, jugadorAfectado.saludMaxima);
+                if (CanvasManager.Instancia != null)
+                {
+                    CanvasManager.Instancia.actualizarBarraVida(IDJugador);
+                }
             }
         }
     }
 
-    Transform obtenerTransformPodio(int posicion)
+    private void ManejarMuerteJugador(DatosJugador jugador)
     {
-        if (posicion == 0)
+        jugador.estaMuerto = true;
+        if (jugador.scriptMovimiento != null)
         {
-            return podioPrimerLugar;
+            jugador.scriptMovimiento.LimpiarEfectos();
+            jugador.scriptMovimiento.enabled = false;
+            CharacterController cc = jugador.scriptMovimiento.GetComponent<CharacterController>();
+            if (cc != null)
+            {
+                cc.enabled = false;
+            }
+            jugador.scriptMovimiento.transform.position = new Vector3(0f, -100f, 0f);
+            Renderer[] renders = jugador.scriptMovimiento.GetComponentsInChildren<Renderer>();
+            for (int i = 0; i < renders.Length; i++)
+            {
+                if (renders[i] != null)
+                {
+                    renders[i].enabled = false;
+                }
+            }
         }
-
-        if (posicion == 1)
-        {
-            return podioSegundoLugar;
-        }
-
-        return podioTercerLugar;
     }
 
-    public void colocarJugadoresPodioFinal()
+    private void VerificarCondicionVictoria()
     {
-        if (jugadoresVivos <= 1)
+        List<DatosJugador> sobrevivientes = new List<DatosJugador>();
+        for (int i = 0; i < listaJugadores.Count; i++)
         {
-            colocarGanadorPrimerLugar();
+            if (listaJugadores[i] != null)
+            {
+                if (listaJugadores[i].estaMuerto == false)
+                {
+                    if (listaJugadores[i].saludActual > 0f)
+                    {
+                        sobrevivientes.Add(listaJugadores[i]);
+                    }
+                }
+            }
         }
-        else
+        if (sobrevivientes.Count == 1)
         {
-            ordenarPorVida();
+            int idGanador = sobrevivientes[0].idJugador;
+            if (GestorVictorias.Instancia != null)
+            {
+                GestorVictorias.Instancia.RegistrarVictoriaRonda(idGanador);
+            }
         }
+        else if (sobrevivientes.Count == 0)
+        {
+            if (GestorVictorias.Instancia != null)
+            {
+                GestorVictorias.Instancia.RegistrarVictoriaRonda(0);
+            }
+        }
+    }
+
+    public float ObtenerSaludActual(int IDJugador)
+    {
+        DatosJugador jugador = null;
+        for (int i = 0; i < listaJugadores.Count; i++)
+        {
+            if (listaJugadores[i] != null)
+            {
+                if (listaJugadores[i].idJugador == IDJugador)
+                {
+                    jugador = listaJugadores[i];
+                    break;
+                }
+            }
+        }
+        float salud = 0f;
+        if (jugador != null)
+        {
+            salud = jugador.saludActual;
+        }
+        return salud;
+    }
+
+    public List<Transform> ObtenerTransformJugadoresVivos()
+    {
+        List<Transform> listaTransforms = new List<Transform>();
+        for (int i = 0; i < listaJugadores.Count; i++)
+        {
+            if (listaJugadores[i] != null)
+            {
+                if (listaJugadores[i].estaMuerto == false)
+                {
+                    if (listaJugadores[i].scriptMovimiento != null)
+                    {
+                        listaTransforms.Add(listaJugadores[i].scriptMovimiento.transform);
+                    }
+                }
+            }
+        }
+        return listaTransforms;
     }
 }

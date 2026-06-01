@@ -1,21 +1,28 @@
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class ArenaManager : MonoBehaviour
 {
     public static ArenaManager Instancia;
 
-    [SerializeField] GameObject itemPrefab;
+    [SerializeField] GameObject Item;
     [SerializeField] int filas;
     [SerializeField] int columnas;
-    [SerializeField] float separacion;
-    [SerializeField] int cantidadPool;
+    [SerializeField] int separacion;
+    [SerializeField] int limiteObjetos;
     [SerializeField] Transform posicionInicial;
 
+    [Header("Curación")]
+    [SerializeField] GameObject prefabCuracion;
+    [SerializeField] float tiempoEntreOleadas = 15f;
+    [SerializeField] int limiteCuracionesEnEscena = 3;
+
+    float cronometroCuracion = 0f;
+    int contadorCuracionesActuales = 0;
+
     public int[,] posicionObjeto;
-
-    List<GameObject> pool = new List<GameObject>();
-
     int randomFilas;
     int randomColumnas;
     public int contadorObjetos = 0;
@@ -27,124 +34,75 @@ public class ArenaManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-
         Instancia = this;
     }
 
     void Start()
     {
         posicionObjeto = new int[filas, columnas];
-
         reiniciarMatriz();
-
-        crearPool();
-
-        generarObjetosIniciales();
     }
 
-    void crearPool()
+    void Update()
     {
-        for (int i = 0; i < cantidadPool; i++)
+        generarObjetos();
+        cronometroCuracion = cronometroCuracion + Time.deltaTime;
+        if (cronometroCuracion >= tiempoEntreOleadas)
         {
-            GameObject obj = Instantiate(itemPrefab);
-
-            obj.SetActive(false);
-
-            pool.Add(obj);
-        }
-    }
-
-    GameObject obtenerObjetoPool()
-    {
-        for (int i = 0; i < pool.Count; i++)
-        {
-            if (!pool[i].activeInHierarchy)
+            cronometroCuracion = 0f;
+            if (contadorCuracionesActuales < limiteCuracionesEnEscena)
             {
-                return pool[i];
-            }
-        }
-
-        return null;
-    }
-
-    void generarObjetosIniciales()
-    {
-        for (int i = 0; i < cantidadPool; i++)
-        {
-            generarObjeto();
-        }
-    }
-
-    public void generarObjeto()
-    {
-        if (generarPosicionAleatoria())
-        {
-            GameObject caja = obtenerObjetoPool();
-
-            if (caja != null)
-            {
-                Vector3 posicion = new Vector3(
-                    posicionInicial.position.x + (separacion * randomColumnas),
-                    posicionInicial.position.y,
-                    posicionInicial.position.z - (separacion * randomFilas)
-                );
-
-                caja.transform.position = posicion;
-
-                caja.transform.rotation = Quaternion.identity;
-
-                Rigidbody rb = caja.GetComponent<Rigidbody>();
-
-                rb.linearVelocity = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
-
-                rb.useGravity = true;
-                rb.isKinematic = false;
-
-                cajasManager scriptCaja = caja.GetComponent<cajasManager>();
-
-                scriptCaja.filaCaja = randomFilas;
-                scriptCaja.columnaCaja = randomColumnas;
-
-                scriptCaja.reiniciarCaja();
-
-                posicionObjeto[randomFilas, randomColumnas] = 2;
-
-                caja.SetActive(true);
-
-                rb.linearVelocity = Vector3.zero;
-
-                rb.angularVelocity = Vector3.zero;
-
-                rb.useGravity = true;
-
-                rb.isKinematic = false;
-
-                caja.transform.rotation = Quaternion.identity;
+                LanzarOleadaDeCuracion();
             }
         }
     }
 
-    bool generarPosicionAleatoria()
+    void LanzarOleadaDeCuracion()
     {
-        int intentos = 0;
-
-        while (intentos < 100)
+        int cantidadASpawnear = limiteCuracionesEnEscena - contadorCuracionesActuales;
+        Debug.Log("OLEADA DE MEDICINA Intentando spawnear " + cantidadASpawnear + " ítems");
+        for (int i = 0; i < cantidadASpawnear; i++)
         {
-            randomFilas = Random.Range(0, filas);
-            randomColumnas = Random.Range(0, columnas);
-
-            if (posicionObjeto[randomFilas, randomColumnas] == 0)
+            int intentos = 0;
+            bool posEncontrada = false;
+            while (posEncontrada == false)
             {
-                posicionObjeto[randomFilas, randomColumnas] = 1;
-
-                return true;
+                if (intentos >= 10)
+                {
+                    break;
+                }
+                intentos = intentos + 1;
+                int rFila = Random.Range(0, filas);
+                int rColumna = Random.Range(0, columnas);
+                if (posicionObjeto[rFila, rColumna] == 0)
+                {
+                    posicionObjeto[rFila, rColumna] = 3;
+                    contadorCuracionesActuales = contadorCuracionesActuales + 1;
+                    float posX = posicionInicial.position.x + (separacion * rColumna);
+                    float posY = posicionInicial.position.y;
+                    float posZ = posicionInicial.position.z - (separacion * rFila);
+                    Vector3 posicionCalculada = new Vector3(posX, posY, posZ);
+                    GameObject tonico = Instantiate(prefabCuracion, posicionCalculada, Quaternion.identity);
+                    Curacion scriptCura = tonico.GetComponent<Curacion>();
+                    if (scriptCura != null)
+                    {
+                        scriptCura.filaOrigen = rFila;
+                        scriptCura.columnaOrigen = rColumna;
+                    }
+                    posEncontrada = true;
+                }
             }
-
-            intentos++;
         }
+    }
 
-        return false;
+    public void RegistrarItemRecogido(int fila, int columna)
+    {
+        posicionObjeto[fila, columna] = 0;
+        contadorCuracionesActuales = contadorCuracionesActuales - 1;
+        if (contadorCuracionesActuales < 0)
+        {
+            contadorCuracionesActuales = 0;
+        }
     }
 
     void reiniciarMatriz()
@@ -156,22 +114,50 @@ public class ArenaManager : MonoBehaviour
                 posicionObjeto[i, j] = 0;
             }
         }
-                posicionInicial.position = new Vector3(-4.5f, 0.6f, 4.5f);
     }
 
-    public void devolverObjeto(GameObject obj, int fila, int columna)
+    bool generarPosicionAleatoria()
     {
-        posicionObjeto[fila, columna] = 0;
+        randomFilas = Random.Range(0, filas);
+        randomColumnas = Random.Range(0, columnas);
+        if (posicionObjeto[randomFilas, randomColumnas] == 0)
+        {
+            posicionObjeto[randomFilas, randomColumnas] = 1;
+            return true;
+        }
+        return false;
+    }
 
-        Rigidbody rb = obj.GetComponent<Rigidbody>();
+    void generarObjetos()
+    {
+        if (contadorObjetos < limiteObjetos)
+        {
+            if (generarPosicionAleatoria() == true)
+            {
+                contadorObjetos = contadorObjetos + 1;
 
-        rb.linearVelocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
-
-        obj.transform.rotation = Quaternion.identity;
-
-        obj.SetActive(false);
-
-        generarObjeto();
+                for (int i = 0; i < filas; i++)
+                {
+                    for (int j = 0; j < columnas; j++)
+                    {
+                        if (posicionObjeto[i, j] == 1)
+                        {
+                            float posX = posicionInicial.position.x + (separacion * j);
+                            float posY = posicionInicial.position.y;
+                            float posZ = posicionInicial.position.z - (separacion * i);
+                            Vector3 posicionCalculada = new Vector3(posX, posY, posZ);
+                            GameObject caja = Instantiate(Item, posicionCalculada, posicionInicial.rotation);
+                            cajasManager managerCaja = caja.GetComponent<cajasManager>();
+                            if (managerCaja != null)
+                            {
+                                managerCaja.filaCaja = i;
+                                managerCaja.columnaCaja = j;
+                            }
+                            posicionObjeto[i, j] = 2;
+                        }
+                    }
+                }
+            }
+        }
     }
 }

@@ -1,33 +1,30 @@
-using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+using UnityEngine.InputSystem;
 using TMPro;
 
 public class CanvasManager : MonoBehaviour
 {
     public static CanvasManager Instancia;
 
-    [SerializeField] Image[] barrasVida;
+    [Header("Listas de Interfaz por Jugador")]
+    [SerializeField]
+    Image[] barrasVida;
+    [SerializeField]
+    Image[] imagenesPerfiles;
+    [SerializeField]
+    TextMeshProUGUI[] textosTrofeos;
 
-    [SerializeField] TextMeshProUGUI textoTimer;
+    [Header("Fin de Ronda")]
+    [SerializeField]
+    GameObject panelFinRonda;
+    [SerializeField]
+    TextMeshProUGUI textoAnuncioRonda;
 
-    [SerializeField] TextMeshProUGUI textoFinal;
-
-    [SerializeField] float tiempoInicial = 60f;
-
-    [SerializeField] Image pantallaNegra;
-
-    [SerializeField] float duracionFade = 2f;
-
-    [SerializeField] float esperaAntesFade = 5f;
-
-    [SerializeField] Transform puntoCamaraPodio;
-
-    [SerializeField] GameObject uiVidas;
-
-    float tiempoActual;
-
-    bool tiempoTerminado = false;
+    bool puedePasarDeRonda = false;
+    bool esFinDelTorneo = false;
+    int idGanadorActual = -1;
 
     void Awake()
     {
@@ -36,175 +33,28 @@ public class CanvasManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-
         Instancia = this;
     }
 
     void Start()
     {
-        tiempoActual = tiempoInicial;
-
-        textoFinal.gameObject.SetActive(false);
-
-        Color color = pantallaNegra.color;
-
-        color.a = 0;
-
-        pantallaNegra.color = color;
-    }
-
-    void Update()
-    {
-        actualizarTimer();
-    }
-
-    void actualizarTimer()
-    {
-        if (tiempoTerminado)
+        if (GestorVictorias.Instancia != null)
         {
-            return;
-        }
-
-        tiempoActual -= Time.deltaTime;
-
-        if (tiempoActual <= 0)
-        {
-            tiempoActual = 0;
-
-            tiempoTerminado = true;
-
-            textoFinal.gameObject.SetActive(true);
-
-            textoFinal.text = "EL TIEMPO SE AGOTO!";
-
-            congelarJugadores();
-
-            StartCoroutine(transicionNegra());
-        }
-
-        textoTimer.text =
-            Mathf.CeilToInt(tiempoActual).ToString();
-    }
-
-    public void finalizarPartida()
-    {
-        if (tiempoTerminado)
-        {
-            return;
-        }
-
-        tiempoTerminado = true;
-
-        textoFinal.gameObject.SetActive(true);
-
-        textoFinal.text = "TENEMOS UN GANADOR!";
-
-        congelarJugadores();
-
-        StartCoroutine(transicionNegra());
-    }
-
-    IEnumerator transicionNegra()
-    {
-        yield return new WaitForSeconds(esperaAntesFade);
-
-        float tiempo = 0;
-
-        Color color = pantallaNegra.color;
-
-        while (tiempo < duracionFade)
-        {
-            tiempo += Time.deltaTime;
-
-            color.a =
-                Mathf.Lerp(0, 1, tiempo / duracionFade);
-
-            pantallaNegra.color = color;
-
-            yield return null;
-        }
-
-        color.a = 1;
-
-        pantallaNegra.color = color;
-
-        SaludManager.Instancia.colocarJugadoresPodioFinal();
-
-        uiVidas.SetActive(false);
-
-        Camera.main.transform.position =
-            puntoCamaraPodio.position;
-
-        Camera.main.transform.rotation =
-            puntoCamaraPodio.rotation;
-
-        textoFinal.gameObject.SetActive(false);
-        textoTimer.gameObject.SetActive(false);
-
-        yield return new WaitForSeconds(1f);
-
-        tiempo = 0;
-
-        while (tiempo < duracionFade)
-        {
-            tiempo += Time.deltaTime;
-
-            color.a =
-                Mathf.Lerp(1, 0, tiempo / duracionFade);
-
-            pantallaNegra.color = color;
-
-            yield return null;
-        }
-
-        color.a = 0;
-
-        pantallaNegra.color = color;
-    }
-
-    void congelarJugadores()
-    {
-        Interaccion[] jugadores =
-            FindObjectsByType<Interaccion>(
-                FindObjectsSortMode.None
-            );
-
-        for (int i = 0; i < jugadores.Length; i++)
-        {
-            jugadores[i].enabled = false;
-
-            Rigidbody rb =
-                jugadores[i].GetComponent<Rigidbody>();
-
-            if (rb != null)
+            if (GestorVictorias.Instancia.ObtenerCantidadJugadoresRegistrados() > 0)
             {
-                rb.linearVelocity = Vector3.zero;
-
-                rb.angularVelocity = Vector3.zero;
-
-                rb.constraints =
-                    RigidbodyConstraints.FreezeAll;
-            }
-        }
-
-        cajasManager[] cajas =
-            FindObjectsByType<cajasManager>(
-                FindObjectsSortMode.None
-            );
-
-        for (int i = 0; i < cajas.Length; i++)
-        {
-            Rigidbody rb =
-                cajas[i].GetComponent<Rigidbody>();
-
-            if (rb != null)
-            {
-                rb.linearVelocity = Vector3.zero;
-
-                rb.angularVelocity = Vector3.zero;
-
-                rb.constraints =
-                    RigidbodyConstraints.FreezeAll;
+                GestorVictorias.Instancia.IniciarJugadoresEnArena();
+                var listaJugadoresInput = PlayerInput.all;
+                for (int i = 0; i < listaJugadoresInput.Count; i++)
+                {
+                    if (listaJugadoresInput[i] != null)
+                    {
+                        listaJugadoresInput[i].SwitchCurrentActionMap("Player");
+                    }
+                }
+                if (panelFinRonda != null)
+                {
+                    panelFinRonda.SetActive(false);
+                }
             }
         }
     }
@@ -212,12 +62,107 @@ public class CanvasManager : MonoBehaviour
     public void actualizarBarraVida(int IDJugador)
     {
         int indice = IDJugador - 1;
-
-        if (indice >= 0 && indice < barrasVida.Length)
+        if (indice >= 0)
         {
-            barrasVida[indice].fillAmount =
-                SaludManager.Instancia
-                .saludJugadores[indice] / 100f;
+            if (indice < barrasVida.Length)
+            {
+                if (SaludManager.Instancia != null)
+                {
+                    if (barrasVida[indice] != null)
+                    {
+                        float salud = SaludManager.Instancia.ObtenerSaludActual(IDJugador);
+                        barrasVida[indice].fillAmount = salud / 100f;
+                    }
+                }
+            }
         }
     }
+
+    public void MostrarPantallaVictoria(int idGanador, bool torneoTerminado)
+    {
+        esFinDelTorneo = torneoTerminado;
+        idGanadorActual = idGanador;
+        if (panelFinRonda != null)
+        {
+            panelFinRonda.SetActive(true);
+        }
+
+        if (textoAnuncioRonda != null)
+        {
+            if (esFinDelTorneo == true)
+            {
+                textoAnuncioRonda.text = "JUGADOR " + idGanador + " ES EL CAMPEON ABSOLUTO. Solo Jugador " + idGanador + " inicia la revancha.";
+            }
+            else
+            {
+                if (idGanador == 0)
+                {
+                    textoAnuncioRonda.text = "EMPATE Cualquier jugador puede confirmar para continuar.";
+                }
+                else
+                {
+                    textoAnuncioRonda.text = "JUGADOR " + idGanador + " GANA LA RONDA. Solo Jugador " + idGanador + " puede continuar.";
+                }
+            }
+        }
+
+        if (GestorVictorias.Instancia != null)
+        {
+            int metaTorneo = GestorVictorias.Instancia.trofeosParaGanarTorneo;
+
+            for (int i = 0; i < textosTrofeos.Length; i++)
+            {
+                if (textosTrofeos[i] != null)
+                {
+                    int idReal = i + 1;
+                    int copasActuales = GestorVictorias.Instancia.ObtenerTrofeosJugador(idReal);
+                    textosTrofeos[i].text = "Jugador " + idReal + ": " + copasActuales + " / " + metaTorneo;
+                }
+            }
+        }
+        var listaJugadoresInputFin = PlayerInput.all;
+        for (int i = 0; i < listaJugadoresInputFin.Count; i++)
+        {
+            if (listaJugadoresInputFin[i] != null)
+            {
+                listaJugadoresInputFin[i].SwitchCurrentActionMap("UI");
+            }
+        }
+        puedePasarDeRonda = true;
+    }
+
+    public void IntentarAlternarRonda(int idJugadorQuePresiono)
+    {
+        if (puedePasarDeRonda == false)
+        {
+            return;
+        }
+        if (idGanadorActual != 0)
+        {
+            if (idJugadorQuePresiono != idGanadorActual)
+            {
+                Debug.Log("CanvasManager: El jugador " + idJugadorQuePresiono + " intento pasar de ronda sin autorizacion.");
+                return;
+            }
+        }
+        puedePasarDeRonda = false;
+        if (GestorVictorias.Instancia != null)
+        {
+            GestorVictorias.Instancia.DesactivarJugadoresParaCambioEscena();
+        }
+        if (esFinDelTorneo == true)
+        {
+            if (GestorVictorias.Instancia != null)
+            {
+                GestorVictorias.Instancia.LimpiarTorneo();
+            }
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+        else
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+    }
+
+    public void OnConfirmar(InputValue value) { }
 }

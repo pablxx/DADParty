@@ -5,9 +5,9 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Users;
 using UnityEngine.SceneManagement;
 
-public class LobbyManager : MonoBehaviour
+public class LobbyManager1 : MonoBehaviour
 {
-    public static LobbyManager Instance;
+    public static LobbyManager1 Instance;
 
     [Header("Player Settings")]
     public int maxPlayers = 4;

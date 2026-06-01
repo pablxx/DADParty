@@ -17,7 +17,7 @@
                 },
                 {
                     "name": "Jump",
-                    "type": "Button",
+                    "type": "PassThrough",
                     "id": "ac0ad2f5-7574-496b-b55f-97821f30bcdc",
                     "expectedControlType": "",
                     "processors": "",
@@ -26,7 +26,7 @@
                 },
                 {
                     "name": "Agarrar",
-                    "type": "Button",
+                    "type": "PassThrough",
                     "id": "818a49c8-fe00-495e-983d-a425e249a98d",
                     "expectedControlType": "",
                     "processors": "",
@@ -36,7 +36,7 @@
             ],
             "bindings": [
                 {
-                    "name": "WASD",
+                    "name": "DIr Joy",
                     "id": "5eea28f9-1fb0-4fb0-b5f9-2231799de031",
                     "path": "2DVector",
                     "interactions": "",
@@ -201,6 +201,61 @@
                     "isPartOfComposite": true
                 },
                 {
+                    "name": "Palancas",
+                    "id": "eeb2dc6f-985a-4ce5-ae48-d48f67cb259e",
+                    "path": "2DVector(mode=2)",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "up",
+                    "id": "1f5b3c42-f720-40c0-b814-56395653f683",
+                    "path": "<HID::4-Axis,12-Button with POV>/hat/up",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Mando2",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "down",
+                    "id": "7ec35698-5125-4b81-9265-6a3820f07200",
+                    "path": "<HID::4-Axis,12-Button with POV>/hat/down",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Mando2",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "left",
+                    "id": "e0e184f5-7c81-4d68-96ce-f13fc36efdbb",
+                    "path": "<HID::4-Axis,12-Button with POV>/hat/left",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Mando2",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "right",
+                    "id": "ea644ff5-c69a-4140-98db-f896f65dacac",
+                    "path": "<HID::4-Axis,12-Button with POV>/hat/right",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Mando2",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
                     "name": "",
                     "id": "abf9d6c9-f632-43e3-b776-a8adf7bf67fb",
                     "path": "<HID::Microntek              USB Joystick          >/button3",
@@ -225,10 +280,21 @@
                 {
                     "name": "",
                     "id": "3cb2654f-0674-442b-bab4-609f542fd3a1",
-                    "path": "<Keyboard>/1",
+                    "path": "<Keyboard>/numpad1",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Teclado2",
+                    "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a22f3469-a86f-45ab-9318-6c3be73ff2c4",
+                    "path": "<HID::4-Axis,12-Button with POV>/button3",
+                    "interactions": "Press(pressPoint=0.1)",
+                    "processors": "",
+                    "groups": ";Mando2",
                     "action": "Jump",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -265,6 +331,191 @@
                     "action": "Agarrar",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "985a62d5-6ed1-4eb9-97ce-079149872c47",
+                    "path": "<HID::4-Axis,12-Button with POV>/button2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Mando2",
+                    "action": "Agarrar",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "UI",
+            "id": "95e95dfe-8f0e-4cd7-8d9d-0dca489eb166",
+            "actions": [
+                {
+                    "name": "Confirmar",
+                    "type": "Button",
+                    "id": "d532effa-8742-45f1-a975-ff5829e6c5b2",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Arriba",
+                    "type": "Button",
+                    "id": "02586408-3d1b-4c76-bca1-1b827e245929",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Abajo",
+                    "type": "Button",
+                    "id": "8e7456b9-6902-4f9c-a47e-cba25f2c368b",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Izquierda",
+                    "type": "Button",
+                    "id": "a9be8418-fba7-40b1-af73-837d10d90e0b",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Derecha",
+                    "type": "Button",
+                    "id": "55585d27-07ad-441d-a818-31e6171472b1",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "0e0b6d28-7824-4be6-9c8b-e7c10fb05043",
+                    "path": "<Keyboard>/enter",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Teclado1",
+                    "action": "Confirmar",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f4815b74-6851-4db4-a88a-a435d4e69e74",
+                    "path": "<HID::Microntek              USB Joystick          >/button10",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Mando",
+                    "action": "Confirmar",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "cd87c341-991b-4ebb-9e66-4a40df7f951c",
+                    "path": "<HID::4-Axis,12-Button with POV>/button10",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Mando",
+                    "action": "Confirmar",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3dee7ce2-5dce-442d-8ffd-f3c1fe4cc7fa",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Teclado1",
+                    "action": "Arriba",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2174834a-8a8b-4125-8dfc-ff52872ff899",
+                    "path": "<Joystick>/stick/up",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Mando",
+                    "action": "Arriba",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b1fd6602-597a-40a6-9674-3f438fe40470",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Teclado1",
+                    "action": "Abajo",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5167b9a7-bea7-4f7f-b728-f11b89dcc831",
+                    "path": "<Joystick>/stick/down",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Mando",
+                    "action": "Abajo",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7a57ad80-f48a-4a0b-8519-5a7cdb18c2b3",
+                    "path": "<Keyboard>/a",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Teclado1",
+                    "action": "Izquierda",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3d397a99-265a-4965-a9d8-fd46cdea9ca8",
+                    "path": "<Joystick>/stick/left",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Mando",
+                    "action": "Izquierda",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8e6dfa52-f5a7-4b73-888a-7564fea35663",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Teclado1",
+                    "action": "Derecha",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "38aeed0a-f59e-4bbb-aeec-c25a07adb8bf",
+                    "path": "<Joystick>/stick/right",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Mando",
+                    "action": "Derecha",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }
@@ -286,7 +537,7 @@
             "bindingGroup": "Mando",
             "devices": [
                 {
-                    "devicePath": "<HID::Microntek              USB Joystick          >",
+                    "devicePath": "<Joystick>",
                     "isOptional": false,
                     "isOR": false
                 }
@@ -298,6 +549,17 @@
             "devices": [
                 {
                     "devicePath": "<Keyboard>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        },
+        {
+            "name": "Mando2",
+            "bindingGroup": "Mando2",
+            "devices": [
+                {
+                    "devicePath": "<Joystick>",
                     "isOptional": false,
                     "isOR": false
                 }
