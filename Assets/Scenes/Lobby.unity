@@ -1427,10 +1427,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefabsPersonajes:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 4236185002483752680, guid: e01e75a17d130b54a89f82f433b0b260, type: 3}
+  - {fileID: 8007085460584822477, guid: b66ddf443f168f7458b00106223cc887, type: 3}
+  - {fileID: 7671228988078801911, guid: fd524dbdec2ac6a428d2302dc1340d4c, type: 3}
+  - {fileID: 7555098278346561547, guid: 62e82e094b7705d479ec37c9179339c8, type: 3}
   alturaDesdeElCielo: 7
   velocidadDeCaida: 20
   curvaDeImpacto:
@@ -1459,6 +1459,9 @@ MonoBehaviour:
     m_RotationOrder: 4
   escalaVisualMultiplicador: 2
   prefabPolvoImpacto: {fileID: 0}
+  duracionAnimacionSaludo: 1.5
+  intervaloSaludoAutomatico: 5
+  velocidadRotacion: 30
 --- !u!1 &750900827
 GameObject:
   m_ObjectHideFlags: 0
@@ -2287,10 +2290,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefabsPersonajes:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 4236185002483752680, guid: e01e75a17d130b54a89f82f433b0b260, type: 3}
+  - {fileID: 8007085460584822477, guid: b66ddf443f168f7458b00106223cc887, type: 3}
+  - {fileID: 7671228988078801911, guid: fd524dbdec2ac6a428d2302dc1340d4c, type: 3}
+  - {fileID: 7555098278346561547, guid: 62e82e094b7705d479ec37c9179339c8, type: 3}
   alturaDesdeElCielo: 7
   velocidadDeCaida: 20
   curvaDeImpacto:
@@ -2319,6 +2322,9 @@ MonoBehaviour:
     m_RotationOrder: 4
   escalaVisualMultiplicador: 2
   prefabPolvoImpacto: {fileID: 0}
+  duracionAnimacionSaludo: 1.5
+  intervaloSaludoAutomatico: 5
+  velocidadRotacion: 30
 --- !u!1 &1285453674
 GameObject:
   m_ObjectHideFlags: 0
@@ -2551,9 +2557,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prefabsPersonajes:
   - {fileID: 4236185002483752680, guid: e01e75a17d130b54a89f82f433b0b260, type: 3}
-  - {fileID: 4427213181558283636, guid: 73cda0830a8ea844594d94ac21df47cd, type: 3}
-  - {fileID: 4526735923136906969, guid: 5b41ffd3abf31b9498767774df2af153, type: 3}
-  - {fileID: 7348739912197346954, guid: 101896652057daa45b47c2a85a4fbfc9, type: 3}
+  - {fileID: 8007085460584822477, guid: b66ddf443f168f7458b00106223cc887, type: 3}
+  - {fileID: 7671228988078801911, guid: fd524dbdec2ac6a428d2302dc1340d4c, type: 3}
+  - {fileID: 7555098278346561547, guid: 62e82e094b7705d479ec37c9179339c8, type: 3}
   alturaDesdeElCielo: 7
   velocidadDeCaida: 20
   curvaDeImpacto:
@@ -2582,6 +2588,9 @@ MonoBehaviour:
     m_RotationOrder: 4
   escalaVisualMultiplicador: 2
   prefabPolvoImpacto: {fileID: 0}
+  duracionAnimacionSaludo: 1.5
+  intervaloSaludoAutomatico: 5
+  velocidadRotacion: 30
 --- !u!1 &1362801669
 GameObject:
   m_ObjectHideFlags: 0
@@ -2920,9 +2929,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prefabsPersonajes:
   - {fileID: 4236185002483752680, guid: e01e75a17d130b54a89f82f433b0b260, type: 3}
-  - {fileID: 4427213181558283636, guid: 73cda0830a8ea844594d94ac21df47cd, type: 3}
-  - {fileID: 4526735923136906969, guid: 5b41ffd3abf31b9498767774df2af153, type: 3}
-  - {fileID: 7348739912197346954, guid: 101896652057daa45b47c2a85a4fbfc9, type: 3}
+  - {fileID: 8007085460584822477, guid: b66ddf443f168f7458b00106223cc887, type: 3}
+  - {fileID: 7671228988078801911, guid: fd524dbdec2ac6a428d2302dc1340d4c, type: 3}
+  - {fileID: 7555098278346561547, guid: 62e82e094b7705d479ec37c9179339c8, type: 3}
   alturaDesdeElCielo: 7
   velocidadDeCaida: 20
   curvaDeImpacto:
@@ -2951,6 +2960,9 @@ MonoBehaviour:
     m_RotationOrder: 4
   escalaVisualMultiplicador: 2
   prefabPolvoImpacto: {fileID: 0}
+  duracionAnimacionSaludo: 1.5
+  intervaloSaludoAutomatico: 5
+  velocidadRotacion: 30
 --- !u!1 &1501527181
 GameObject:
   m_ObjectHideFlags: 0

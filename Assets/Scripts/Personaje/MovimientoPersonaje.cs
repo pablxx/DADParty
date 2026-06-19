@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController))]
@@ -47,7 +47,6 @@ public class MovimientoPersonaje : MonoBehaviour
         }
         ForzarRegistroEnSaludActual();
 
-        // Intenta buscar el animador por si ya existiera un modelo acoplado
         ActualizarReferenciaAnimador();
     }
 
@@ -66,7 +65,8 @@ public class MovimientoPersonaje : MonoBehaviour
                 Mover();
                 Rotar();
                 ManejarAnimacionCaminando();
-            }
+                ManejarAnimacionSaltando(); // 🔥 NUEVO: Monitorea el estado del salto en tiempo real
+            }
         }
     }
 
@@ -99,9 +99,37 @@ public class MovimientoPersonaje : MonoBehaviour
         }
     }
 
+    // 🔥 NUEVO MÉTODO: Setea el bool "Saltando" según el estado físico del personaje
+    private void ManejarAnimacionSaltando()
+    {
+        if (animadorHijo == null)
+        {
+            ActualizarReferenciaAnimador();
+        }
+
+        if (animadorHijo != null && controller != null)
+        {
+            // Si NO está en el suelo, significa que está en el aire (Saltando)
+            bool enElAire = !controller.isGrounded;
+            animadorHijo.SetBool("Saltando", enElAire);
+        }
+    }
+
     public void ActualizarReferenciaAnimador()
     {
-        animadorHijo = GetComponentInChildren<Animator>();
+        Animator[] todosLosAnimadores = GetComponentsInChildren<Animator>();
+        foreach (Animator anim in todosLosAnimadores)
+        {
+            if (anim != null && anim.runtimeAnimatorController != null)
+            {
+                animadorHijo = anim;
+                return;
+            }
+        }
+        if (todosLosAnimadores.Length > 0)
+        {
+            animadorHijo = todosLosAnimadores[0];
+        }
     }
 
     public void ForzarRegistroEnSaludActual()
@@ -203,7 +231,6 @@ public class MovimientoPersonaje : MonoBehaviour
 
     private void Rotar()
     {
-       
         if (tiempoInmovilLanzamiento > 0f) return;
 
         Vector3 direccion3D = new Vector3(direccionInput.x, 0f, direccionInput.y);
@@ -250,7 +277,7 @@ public class MovimientoPersonaje : MonoBehaviour
         tiempoRestanteAceite = 0f;
         estaQuemando = false;
         tiempoRestanteLlajua = 0f;
-        tiempoInmovilLanzamiento = 0f; 
+        tiempoInmovilLanzamiento = 0f;
     }
 
     void OnMove(InputValue value)
@@ -262,6 +289,7 @@ public class MovimientoPersonaje : MonoBehaviour
     {
         if (controller == null)
         {
+
             controller = GetComponent<CharacterController>();
         }
 
@@ -278,6 +306,7 @@ public class MovimientoPersonaje : MonoBehaviour
                         if (puedeSaltar == true)
                         {
                             Saltar();
+                            animadorHijo.SetBool("Saltando", true);
                         }
                     }
                 }

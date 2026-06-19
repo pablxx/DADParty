@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class FichaConexion : MonoBehaviour
 {
@@ -12,6 +13,11 @@ public class FichaConexion : MonoBehaviour
 
     public void OnConfirmar(InputValue value)
     {
+        if (SceneManager.GetActiveScene().name == "Inicio") {
+            SondosManager.Instancia.PlayUIPorIndice(1);
+            SondosManager.Instancia.ReproducirMusicaPorIndice(0);
+        }
+       
         if (value.isPressed == true)
         {
             if (yaInicio == false)

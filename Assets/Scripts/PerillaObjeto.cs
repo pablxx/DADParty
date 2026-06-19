@@ -1,54 +1,57 @@
-using UnityEngine;
+Ôªøusing UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 public class PerillaObjeto : MonoBehaviour
 {
-    [Header("ConfiguraciÛn de ¡rea (Caja Ajustable)")]
-    [SerializeField] private Vector3 tamaÒoCaja = new Vector3(2f, 2f, 2f);
+    [Header("Configuraci√≥n de √Årea (Caja Ajustable)")]
+    [SerializeField] private Vector3 tama√±oCaja = new Vector3(2f, 2f, 2f);
     [SerializeField] private Vector3 offsetCentro = Vector3.zero;
     [SerializeField] private LayerMask capaJugadores;
 
     private List<GameObject> jugadoresEnRango = new List<GameObject>();
-    private Color colorOriginal;
-    private MeshRenderer miRenderer;
+
+    // üî• MODIFICADO: Estructura para almacenar m√∫ltiples mallas y sus respectivos colores originales
+    private List<MeshRenderer> todosLosRenderers = new List<MeshRenderer>();
+    private List<Color> coloresOriginales = new List<Color>();
 
     // NUEVO: Flag para bloquear interacciones temporales en la ronda sin apagar el script
     private bool yaUsada = false;
 
     private void Awake()
     {
-        miRenderer = GetComponent<MeshRenderer>();
-        if (miRenderer == null) miRenderer = GetComponentInChildren<MeshRenderer>();
+        // üî• MODIFICADO: Escaneamos absolutamente todas las mallas hijas y del padre
+        MeshRenderer[] renderersEncontrados = GetComponentsInChildren<MeshRenderer>();
 
-        if (miRenderer != null)
+        foreach (MeshRenderer renderer in renderersEncontrados)
         {
-            colorOriginal = miRenderer.material.color;
+            if (renderer != null && renderer.material != null)
+            {
+                todosLosRenderers.Add(renderer);
+                coloresOriginales.Add(renderer.material.color); // Guardamos el color individual de cada parte
+            }
         }
     }
 
-    // CAMINO 1: Se usÛ como perilla SEGURA (Se ennegrece pero el script sigue vivo para la prÛxima ronda)
+    // CAMINO 1: Se us√≥ como perilla SEGURA (Se ennegrece pero el script sigue vivo para la pr√≥xima ronda)
     public void MarcarComoSeguraUsada()
     {
         yaUsada = true;
         jugadoresEnRango.Clear();
 
-        if (miRenderer != null)
-        {
-            miRenderer.material.color = Color.black;
-        }
+        // üî• MODIFICADO: Pintamos absolutamente todas las piezas de negro
+        PintarTodoElConjunto(Color.black);
     }
 
-    // CAMINO 2: Esta perilla causÛ la MUERTE (Se apaga definitivamente en toda la partida)
+    // CAMINO 2: Esta perilla caus√≥ la MUERTE (Se apaga definitivamente en toda la partida)
     public void DesactivarPorMuerte()
     {
         yaUsada = true;
-        this.enabled = false; // AquÌ sÌ matamos el script por completo
+        this.enabled = false; // Aqu√≠ s√≠ matamos el script por completo
         jugadoresEnRango.Clear();
 
-        if (miRenderer != null)
-        {
-            miRenderer.material.color = Color.black;
-        }
+        // üî• MODIFICADO: Pintamos absolutamente todas las piezas de negro
+        PintarTodoElConjunto(Color.black);
     }
 
     public void ResetearPerillaCompleto()
@@ -57,15 +60,31 @@ public class PerillaObjeto : MonoBehaviour
         yaUsada = false;
         jugadoresEnRango.Clear();
 
-        if (miRenderer != null)
+        // üî• MODIFICADO: Devolvemos a cada pieza su color original guardado en el inicio
+        for (int i = 0; i < todosLosRenderers.Count; i++)
         {
-            miRenderer.material.color = colorOriginal;
+            if (todosLosRenderers[i] != null)
+            {
+                todosLosRenderers[i].material.color = coloresOriginales[i];
+            }
+        }
+    }
+
+    // üî• NUEVO M√âTODO AUXILIAR: Recorre todas las mallas del conjunto para aplicar el color
+    private void PintarTodoElConjunto(Color nuevoColor)
+    {
+        for (int i = 0; i < todosLosRenderers.Count; i++)
+        {
+            if (todosLosRenderers[i] != null)
+            {
+                todosLosRenderers[i].material.color = nuevoColor;
+            }
         }
     }
 
     void Update()
     {
-        if (yaUsada) return; // Si ya se usÛ en este turno, no detecta a nadie
+        if (yaUsada) return; // Si ya se us√≥ en este turno, no detecta a nadie
         VerificarDeteccionJugadores();
     }
 
@@ -74,7 +93,7 @@ public class PerillaObjeto : MonoBehaviour
         jugadoresEnRango.Clear();
 
         Vector3 posicionCentro = transform.position + transform.TransformDirection(offsetCentro);
-        Collider[] collidersEncontrados = Physics.OverlapBox(posicionCentro, tamaÒoCaja / 2f, transform.rotation, capaJugadores);
+        Collider[] collidersEncontrados = Physics.OverlapBox(posicionCentro, tama√±oCaja / 2f, transform.rotation, capaJugadores);
 
         for (int i = 0; i < collidersEncontrados.Length; i++)
         {
@@ -102,9 +121,9 @@ public class PerillaObjeto : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        if (!enabled) return; // Si explotÛ, no pinta caja cian
+        if (!enabled) return; // Si explot√≥, no pinta caja cian
         Gizmos.color = Color.cyan;
         Gizmos.matrix = transform.localToWorldMatrix;
-        Gizmos.DrawWireCube(offsetCentro, tamaÒoCaja);
+        Gizmos.DrawWireCube(offsetCentro, tama√±oCaja);
     }
 }

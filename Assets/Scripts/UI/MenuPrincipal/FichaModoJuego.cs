@@ -9,6 +9,7 @@ public class FichaModoJuego : MonoBehaviour
     {
         if (value.isPressed == true)
         {
+            SondosManager.Instancia.PlayUIPorIndice(0);
             if (MenuMinijuegosManager.Instancia != null)
             {
                 MenuMinijuegosManager.Instancia.MoverSeleccion(-1);
@@ -28,6 +29,7 @@ public class FichaModoJuego : MonoBehaviour
     {
         if (value.isPressed == true)
         {
+            SondosManager.Instancia.PlayUIPorIndice(0);
             if (MenuMinijuegosManager.Instancia != null)
             {
                 MenuMinijuegosManager.Instancia.MoverSeleccion(1);
@@ -49,6 +51,7 @@ public class FichaModoJuego : MonoBehaviour
         {
             if (yaConfirmo == false)
             {
+                SondosManager.Instancia.PlayUIPorIndice(1);
                 if (MenuMinijuegosManager.Instancia != null)
                 {
                     MenuMinijuegosManager.Instancia.ConfirmarSeleccionActual();

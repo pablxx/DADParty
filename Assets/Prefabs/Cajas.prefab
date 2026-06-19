@@ -107,9 +107,9 @@ MonoBehaviour:
   Tomado: 0
   IDJugador: 0
   cantidadDanio: 0
-  prefabComun: {fileID: 6971273780246126776, guid: 41226ae77e046014fb04ea3cd5250ade, type: 3}
+  prefabComun: {fileID: 5374618609713671120, guid: f75a9fdbb8c71314082bde49ebb19e0e, type: 3}
   prefabAceite: {fileID: 7437237736114411759, guid: 1678a23b5499db14e8b1144941b739bc, type: 3}
-  prefabLlajua: {fileID: 7459892322727806639, guid: b4d217d39f0094d458ae3bf3a7125698, type: 3}
+  prefabLlajua: {fileID: 5522235824439316438, guid: d627c5febad23bc439e369498d068dc7, type: 3}
   prefabMiel: {fileID: 5356232816974753123, guid: 7454a4429746c4442b768c0054999884, type: 3}
 --- !u!65 &954790968910206659
 BoxCollider:

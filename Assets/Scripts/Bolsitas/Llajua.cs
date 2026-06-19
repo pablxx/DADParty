@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections;
 using UnityEngine;
 
@@ -13,10 +13,13 @@ public class Llajua : MonoBehaviour
 
     [Header("Tiempos del Ciclo Visual")]
     [SerializeField] float tiempoCrecimiento = 0.4f;
-    [SerializeField] float tiempoEnPantalla = 5.0f; // Cu�nto dura el picante quemando en el piso
+    [SerializeField] float tiempoEnPantalla = 5.0f; // Cuánto dura el picante quemando en el piso
     [SerializeField] float tiempoDesvanecer = 0.6f;
 
-    // --- ESCASAS FIJAS DICTADAS POR DISE�O ---
+    [Header("Efectos de Partículas")]
+    [SerializeField] private GameObject prefabParticulaPicante; // Tu prefab con Loop activado
+
+    // --- ESCALAS FIJAS DICTADAS POR DISEÑO ---
     private readonly Vector3 escalaMaximaFija = new Vector3(1.5f, 0.017f, 1.5f);
     private readonly Vector3 escalaCeroFija = Vector3.zero;
 
@@ -26,6 +29,7 @@ public class Llajua : MonoBehaviour
     private bool trampaActiva = false;
     private bool destruyendo = false;
     private Coroutine corrutinaCiclo;
+    private GameObject particulaUnicaClon; // Referencia para controlar el clon único
 
     // Se ejecuta cada vez que el Pool revive la llajua
     void OnEnable()
@@ -42,11 +46,18 @@ public class Llajua : MonoBehaviour
             StopCoroutine(corrutinaCiclo);
         }
 
+        // 🔥 INSTANCIA ÚNICA: Creamos solo una partícula en el centro al nacer el charco
+        if (prefabParticulaPicante != null)
+        {
+            particulaUnicaClon = Instantiate(prefabParticulaPicante, transform.position, transform.rotation);
+        }
+
         corrutinaCiclo = StartCoroutine(CicloDeVidaLlajua());
     }
 
     void Update()
     {
+        // El Update ahora solo se enfoca en buscar jugadores. Ya no genera partículas infinitas.
         if (trampaActiva && !destruyendo)
         {
             EscanearJugadores();
@@ -126,15 +137,22 @@ public class Llajua : MonoBehaviour
             }
         }
     }
+
     void OnDisable()
     {
         jugadoresAfectados.Clear();
         jugadoresDetectados.Clear();
+
+        // 🔥 LIMPIEZA TOTAL: Eliminamos la partícula única de inmediato al volver al Pool
+        if (particulaUnicaClon != null)
+        {
+            Destroy(particulaUnicaClon);
+        }
     }
 
     void OnDrawGizmos()
     {
-        Gizmos.color = new Color(1f, 0f, 0f, 0.3f); 
+        Gizmos.color = new Color(1f, 0f, 0f, 0.3f);
         Vector3 centro = transform.position;
         Vector3 mitadTamanio = escalaMaximaFija / 2f;
         mitadTamanio.y = 1f;

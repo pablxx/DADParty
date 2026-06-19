@@ -1,4 +1,4 @@
-using UnityEngine;
+Ôªøusing UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -9,7 +9,7 @@ public class PerillasManager : MonoBehaviour
     [Header("Referencias de Perillas")]
     [SerializeField] private List<PerillaObjeto> listaPerillas = new List<PerillaObjeto>();
 
-    [Header("ConfiguraciÛn Oculta")]
+    [Header("Configuraci√≥n Oculta")]
     [SerializeField] private int indiceMaldito;
     [SerializeField] private bool juegoTerminado = false;
 
@@ -29,14 +29,14 @@ public class PerillasManager : MonoBehaviour
     {
         juegoTerminado = false;
 
-        // 1. Detectamos cu·ntos jugadores hay gracias al Gestor de Victorias
+        // 1. Detectamos cu√°ntos jugadores hay gracias al Gestor de Victorias
         if (GestorVictorias.Instancia != null)
         {
             int cantidadJugadores = GestorVictorias.Instancia.ObtenerCantidadJugadoresRegistrados();
 
             if (cantidadJugadores > 0)
             {
-                // Regla: N˙mero de jugadores + 1 perilla extra
+                // Regla: N√∫mero de jugadores + 1 perilla extra
                 perillasPermitidasEstaPartida = cantidadJugadores + 1;
             }
             else
@@ -56,7 +56,7 @@ public class PerillasManager : MonoBehaviour
             {
                 if (i >= perillasPermitidasEstaPartida)
                 {
-                    // <-- °CORREGIDO!: Usamos el mÈtodo que ya apaga el script Y le clava el color negro de una vez
+                    // <-- ¬°CORREGIDO!: Usamos el m√©todo que ya apaga el script Y le clava el color negro de una vez
                     listaPerillas[i].DesactivarPorMuerte();
                 }
             }
@@ -68,46 +68,85 @@ public class PerillasManager : MonoBehaviour
 
     public void SorteoInicialRonda()
     {
-        // En lugar de usar listaPerillas.Count, sorteamos estrictamente entre las permitidas
         if (perillasPermitidasEstaPartida > 0)
         {
             indiceMaldito = Random.Range(0, perillasPermitidasEstaPartida);
-            Debug.Log($"<color=green>[PerillasManager] Sorteo Inicial. Jugadores activos. Perillas habilitadas: {perillasPermitidasEstaPartida}. Õndice trampa: {indiceMaldito}</color>");
+            Debug.Log($"<color=green>[PerillasManager] Sorteo Inicial. Jugadores activos. Perillas habilitadas: {perillasPermitidasEstaPartida}. √çndice trampa: {indiceMaldito}</color>");
         }
     }
 
     public void ProcesarActivacionPerilla(PerillaObjeto perillaActivada, GameObject jugadorQueActiva)
     {
         if (juegoTerminado) return;
+        StartCoroutine(SecuenciaAnimacionYRotacionPerilla(perillaActivada, jugadorQueActiva));
+    }
+    // üî• CORRUTINA ACTUALIZADA: Asegura la mirada al frente al inicio y el volteo al final
+    private IEnumerator SecuenciaAnimacionYRotacionPerilla(PerillaObjeto perillaActivada, GameObject jugadorQueActiva)
+    {
+        // 1. Forzar rotaci√≥n inmediata a 180 grados en Y para que opere mirando al frente
+        if (jugadorQueActiva != null)
+        {
+            jugadorQueActiva.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+        }
 
+        // 2. Buscamos el Animator real profundo e iniciamos la animaci√≥n de la perilla
+        Animator animReal = jugadorQueActiva.GetComponent<Animator>();
+        if (animReal == null) animReal = jugadorQueActiva.GetComponentInChildren<Animator>();
+
+        if (animReal != null)
+        {
+            animReal.SetBool("Perilla", true);
+        }
+
+        // 3. Mantenemos la animaci√≥n activa durante exactamente 1 segundo
+        yield return new WaitForSeconds(1f);
+
+        // 4. Pasado el segundo, apagamos el bool y lo hacemos voltear a 0 grados en Y para la resoluci√≥n
+        if (animReal != null)
+        {
+            animReal.SetBool("Perilla", false);
+        }
+
+        if (jugadorQueActiva != null)
+        {
+            jugadorQueActiva.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+        }
+
+        // 5. Se ejecuta el destino de la ronda (Bomba o Salvado)
         int indiceActivado = listaPerillas.IndexOf(perillaActivada);
 
         if (indiceActivado == indiceMaldito)
         {
-            Debug.Log($"<color=red>[PerillasManager] °INDICE MALDITO DETECTADO ({indiceActivado})! Iniciando cuenta atr·s...</color>");
+            Debug.Log($"<color=red>[PerillasManager] ¬°INDICE MALDITO DETECTADO ({indiceActivado})! Iniciando cuenta atr√°s...</color>");
 
-            // El botÛn trampa se desactiva permanentemente de la partida
             perillaActivada.DesactivarPorMuerte();
 
             StartCoroutine(CronometroMuerte(jugadorQueActiva));
         }
         else
         {
-            Debug.Log($"<color=green>[PerillasManager] °TE SALVASTE! La perilla {indiceActivado} es segura.</color>");
+            Debug.Log($"<color=green>[PerillasManager] ¬°TE SALVASTE! La perilla {indiceActivado} es segura.</color>");
 
-            // Las seguras solo se marcan temporalmente como usadas (ennegrecen sin morir)
             perillaActivada.MarcarComoSeguraUsada();
 
-            if (ExplosionManager.Instancia.VerificarFinDeRondaLimpia())
-            {
-                Debug.Log("<color=yellow>[PerillasManager] °Todos se salvaron! Restaurando tablero completo para la siguiente ronda.</color>");
-                RestaurarTodoElTablero();
-                ExplosionManager.Instancia.ReiniciarRondaLimpia(jugadorQueActiva);
-            }
-            else
-            {
-                ExplosionManager.Instancia.RegresarJugadorAFila();
-            }
+            StartCoroutine(RetrasarRegresoFila(jugadorQueActiva));
+        }
+    }
+
+    private IEnumerator RetrasarRegresoFila(GameObject jugadorQueActiva)
+    {
+        Animator anim = jugadorQueActiva.GetComponentInChildren<Animator>();
+        if (anim != null) anim.SetBool("Caminando", false);
+        yield return new WaitForSeconds(2f);
+        if (ExplosionManager.Instancia.VerificarFinDeRondaLimpia())
+        {
+            Debug.Log("<color=yellow>[PerillasManager] ¬°Todos se salvaron! Restaurando tablero completo para la siguiente ronda.</color>");
+            RestaurarTodoElTablero();
+            ExplosionManager.Instancia.ReiniciarRondaLimpia(jugadorQueActiva);
+        }
+        else
+        {
+            ExplosionManager.Instancia.RegresarJugadorAFila();
         }
     }
 
@@ -121,12 +160,12 @@ public class PerillasManager : MonoBehaviour
         float tiempoRestante = 3f;
         while (tiempoRestante > 0f)
         {
-            Debug.Log($"[PerillasManager] °EXPLOSI”N EN: {Mathf.CeilToInt(tiempoRestante)}...!");
+            Debug.Log($"[PerillasManager] ¬°EXPLOSI√ìN EN: {Mathf.CeilToInt(tiempoRestante)}...!");
             tiempoRestante -= Time.deltaTime;
             yield return null;
         }
 
-        Debug.Log("<color=red>[PerillasManager] °BOOM! Sacando jugador de la lista y lanz·ndolo por los aires.</color>");
+        Debug.Log("<color=red>[PerillasManager] ¬°BOOM! Sacando jugador de la lista y lanz√°ndolo por los aires.</color>");
 
         if (ExplosionManager.Instancia != null)
         {
@@ -145,7 +184,7 @@ public class PerillasManager : MonoBehaviour
         {
             if (listaPerillas[i] != null)
             {
-                // Si el script sigue activo, significa que NO causÛ una explosiÛn en turnos pasados
+                // Si el script sigue activo, significa que NO caus√≥ una explosi√≥n en turnos pasados
                 if (listaPerillas[i].enabled)
                 {
                     listaPerillas[i].ResetearPerillaCompleto(); // Revive y vuelve a su color original
@@ -164,7 +203,7 @@ public class PerillasManager : MonoBehaviour
         indiceMaldito = perillasDisponibles[randomChoice];
         juegoTerminado = false;
 
-        Debug.Log($"<color=orange>[PerillasManager] °Ronda tras explosiÛn configurada! Perillas devueltas a cian: {perillasDisponibles.Count}. Nueva trampa oculta: {indiceMaldito}</color>");
+        Debug.Log($"<color=orange>[PerillasManager] ¬°Ronda tras explosi√≥n configurada! Perillas devueltas a cian: {perillasDisponibles.Count}. Nueva trampa oculta: {indiceMaldito}</color>");
     }
 
     public void RestaurarTodoElTablero()
@@ -183,7 +222,7 @@ public class PerillasManager : MonoBehaviour
             }
         }
 
-        // Sorteamos el nuevo Ìndice maldito usando ˙nicamente las que siguen vivas de verdad
+        // Sorteamos el nuevo √≠ndice maldito usando √∫nicamente las que siguen vivas de verdad
         if (perillasDisponibles.Count > 0)
         {
             int randomChoice = Random.Range(0, perillasDisponibles.Count);

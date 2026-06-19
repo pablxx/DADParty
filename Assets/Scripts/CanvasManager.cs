@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
 using System.Collections;
 using TMPro;
+using UnityEditor.ShaderGraph.Internal;
 
 public class CanvasManager : MonoBehaviour
 {
@@ -47,6 +48,7 @@ public class CanvasManager : MonoBehaviour
 
     void Start()
     {
+        SondosManager.Instancia.ReproducirMusicaPorIndice(Random.Range(1, 3));
         tiempoRestante = tiempoMaximoRonda;
         ActualizarTextoReloj();
 
@@ -70,6 +72,7 @@ public class CanvasManager : MonoBehaviour
             {
                 tiempoRestante = 0f;
                 juegoActivo = false;
+                SondosManager.Instancia.PlaySFXPorIndice(9);
                 if (GestorVictorias.Instancia != null) // ojo aqui debemos cambiar a comparar con la vida.
                 {
                     GestorVictorias.Instancia.RegistrarVictoriaRonda(0);
@@ -93,7 +96,7 @@ public class CanvasManager : MonoBehaviour
             }
             else
             {
-                textoRelojPartida.color = Color.white;
+                textoRelojPartida.color = Color.black;
             }
         }
     }
@@ -119,8 +122,10 @@ public class CanvasManager : MonoBehaviour
         else
         {
             if (panelReglasInicio != null) panelReglasInicio.SetActive(false);
+            SondosManager.Instancia.PlaySFXPorIndice(8);
             StartCoroutine(CorrutinaCuentaRegresiva());
         }
+        
     }
 
     private IEnumerator CorrutinaCuentaRegresiva()
@@ -128,18 +133,61 @@ public class CanvasManager : MonoBehaviour
         BloquearJugadores(true);
         CambiarActionMapGlobal("UI");
 
+        // 1. Buscamos a todos los jugadores y encendemos "levantarse" en True al iniciar la ronda
+        MovimientoPersonaje[] todosLosJugadores = FindObjectsByType<MovimientoPersonaje>(FindObjectsSortMode.None);
+        foreach (MovimientoPersonaje personaje in todosLosJugadores)
+        {
+            if (personaje != null)
+            {
+                Animator anim = personaje.GetComponentInChildren<Animator>();
+                if (anim == null) anim = personaje.GetComponent<Animator>();
+
+                if (anim != null)
+                {
+                    anim.SetBool("Muriendo", false);
+                    anim.SetBool("Levantarse", true);
+                }
+            }
+        }
+
         if (textoContadorInicio != null)
         {
             textoContadorInicio.gameObject.SetActive(true);
 
-            for (int i = 3; i > 0; i--)
+            // --- PROCESO DEL CONTADOR ---
+            // SEGUNDO 3: Aparece el "3" en pantalla con el bool en true
+            textoContadorInicio.text = "3";
+            textoContadorInicio.transform.localScale = Vector3.one * 1.3f;
+
+            // 🔥 Esperamos exactamente 1 segundo con la animación activa
+            yield return new WaitForSeconds(1f);
+
+            // 🔥 NUEVO: Pasado el segundo, apagamos el bool "levantarse" por completo antes de seguir
+            foreach (MovimientoPersonaje personaje in todosLosJugadores)
             {
-                textoContadorInicio.text = i.ToString();
-                textoContadorInicio.transform.localScale = Vector3.one * 1.3f;
-                yield return new WaitForSeconds(1f);
+                if (personaje != null)
+                {
+                    Animator anim = personaje.GetComponentInChildren<Animator>();
+                    if (anim == null) anim = personaje.GetComponent<Animator>();
+
+                    if (anim != null)
+                    {
+                        anim.SetBool("Levantarse", false);
+                    }
+                }
             }
 
-            textoContadorInicio.text = "¡A CAMBULLAR!";
+            // SEGUNDO 2: El juego sigue con la cuenta regresiva normal
+            textoContadorInicio.text = "2";
+            textoContadorInicio.transform.localScale = Vector3.one * 1.3f;
+            yield return new WaitForSeconds(1f);
+
+            // SEGUNDO 1:
+            textoContadorInicio.text = "1";
+            textoContadorInicio.transform.localScale = Vector3.one * 1.3f;
+            yield return new WaitForSeconds(1f);
+
+            textoContadorInicio.text = "LUCHEN!";
             textoContadorInicio.transform.localScale = Vector3.one * 1.5f;
             yield return new WaitForSeconds(0.8f);
 
@@ -150,7 +198,7 @@ public class CanvasManager : MonoBehaviour
         CambiarActionMapGlobal("Player");
         juegoActivo = true;
     }
-
+    
     private void BloquearJugadores(bool bloquear)
     {
         MovimientoPersonaje[] todosLosJugadores = FindObjectsByType<MovimientoPersonaje>(FindObjectsSortMode.None);
@@ -202,6 +250,7 @@ public class CanvasManager : MonoBehaviour
         if (panelFinRonda != null)
         {
             panelFinRonda.SetActive(true);
+            SondosManager.Instancia.PlaySFXPorIndice(11);
         }
 
         if (textoAnuncioRonda != null)
@@ -248,6 +297,7 @@ public class CanvasManager : MonoBehaviour
         {
             esperandoConfirmarReglas = false;
             if (panelReglasInicio != null) panelReglasInicio.SetActive(false);
+            SondosManager.Instancia.PlaySFXPorIndice(8);
             StartCoroutine(CorrutinaCuentaRegresiva());
             return;
         }

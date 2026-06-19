@@ -58,7 +58,7 @@ public class cajasManager : MonoBehaviour
         switch (tipoActual)
         {
             case TipoObjeto.comun:
-                cantidadDanio = 100;
+                cantidadDanio = 15;
                 prefabAInstanciar = prefabComun;
                 break;
 

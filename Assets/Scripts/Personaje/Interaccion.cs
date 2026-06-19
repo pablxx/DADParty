@@ -1,7 +1,9 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using static UnityEngine.Rendering.DebugUI;
+
 public class Interaccion : MonoBehaviour
 {
     [SerializeField]
@@ -22,11 +24,20 @@ public class Interaccion : MonoBehaviour
     public int IDjugador;
     GameObject caja;
     bool Sujetar = false;
+    private Animator animadorHijo;
+    private bool enTransicionAMano = false;
+
+    void Start()
+    {
+        ActualizarReferenciaAnimador();
+    }
 
     void OnAgarrar(InputValue value)
     {
         if (value.isPressed)
         {
+            if (enTransicionAMano) return;
+
             if (Sujetar == false)
             {
                 detectarObjeto();
@@ -37,11 +48,11 @@ public class Interaccion : MonoBehaviour
             }
         }
     }
+
     void OnAccionar(InputValue value)
     {
         if (value.isPressed && PerillasManager.Instancia != null)
         {
-            // Reducimos el radio a 1.2f para que sea más preciso y no capte todo el mapa
             Collider[] colisionadores = Physics.OverlapSphere(transform.position, 1.2f);
 
             PerillaObjeto perillaMasCercana = null;
@@ -61,13 +72,13 @@ public class Interaccion : MonoBehaviour
                 }
             }
 
-            // Solo disparamos la acción en la que esté físicamente más pegada a ti
             if (perillaMasCercana != null)
             {
                 perillaMasCercana.onAgarrar(gameObject);
             }
         }
     }
+
     void Update()
     {
         if (enVuelo)
@@ -133,6 +144,7 @@ public class Interaccion : MonoBehaviour
         enVuelo = false;
         Destroy(caja);
         caja = null;
+        ActualizarEstadoAnimacionAlzando(false);
     }
 
     void detectarObjeto()
@@ -146,7 +158,6 @@ public class Interaccion : MonoBehaviour
             if (hit.collider.CompareTag("Arrojable"))
             {
                 LevantarObjeto(hit.collider.gameObject);
-                Sujetar = true;
             }
         }
     }
@@ -172,12 +183,46 @@ public class Interaccion : MonoBehaviour
                 ArenaManager.Instancia.posicionObjeto[filCaja, colCaja] = 0;
             }
         }
-        caja.transform.position = puntoMano.position;
-        caja.transform.SetParent(puntoMano);
+
+        ActualizarEstadoAnimacionAlzando(true);
+        StartCoroutine(TransicionLerpAMano());
+        StartCoroutine(temporizadorAlzar());
+    }
+
+    IEnumerator TransicionLerpAMano()
+    {
+        enTransicionAMano = true;
+        Vector3 posicionInicial = caja.transform.position;
+        Quaternion rotacionInicial = caja.transform.rotation;
+        float tiempo = 0f;
+        float duracionLerp = 0.25f;
+
+        while (tiempo < duracionLerp)
+        {
+            if (caja == null) yield break;
+            tiempo += Time.deltaTime;
+            float porcentaje = Mathf.Clamp01(tiempo / duracionLerp);
+
+            caja.transform.position = Vector3.Lerp(posicionInicial, puntoMano.position, porcentaje);
+            caja.transform.rotation = Quaternion.Lerp(rotacionInicial, puntoMano.rotation, porcentaje);
+            yield return null;
+        }
+
+        if (caja != null)
+        {
+            caja.transform.position = puntoMano.position;
+            caja.transform.rotation = puntoMano.rotation;
+            caja.transform.SetParent(puntoMano);
+        }
+
+        Sujetar = true;
+        enTransicionAMano = false;
     }
 
     void lanzarObjeto()
     {
+        animadorHijo.SetBool("Lanzando", true);
+        StartCoroutine(temporizadorAlzar());
         MovimientoPersonaje movimiento = GetComponent<MovimientoPersonaje>();
         if (movimiento != null)
         {
@@ -194,6 +239,37 @@ public class Interaccion : MonoBehaviour
         }
     }
 
+    private void ActualizarReferenciaAnimador()
+    {
+        Animator[] todosLosAnimadores = GetComponentsInChildren<Animator>();
+
+        foreach (Animator anim in todosLosAnimadores)
+        {
+            if (anim != null && anim.runtimeAnimatorController != null)
+            {
+                animadorHijo = anim;
+                return;
+            }
+        }
+        if (todosLosAnimadores.Length > 0)
+        {
+            animadorHijo = todosLosAnimadores[0];
+        }
+    }
+
+    private void ActualizarEstadoAnimacionAlzando(bool estaAlzando)
+    {
+        if (animadorHijo == null)
+        {
+            ActualizarReferenciaAnimador();
+        }
+
+        if (animadorHijo != null)
+        {
+            animadorHijo.SetBool("Alzando", estaAlzando);
+        }
+    }
+
     void OnDrawGizmos()
     {
         if (enVuelo)
@@ -205,5 +281,12 @@ public class Interaccion : MonoBehaviour
                 Gizmos.DrawWireCube(Vector3.zero, caja.transform.localScale);
             }
         }
+    }
+
+    IEnumerator temporizadorAlzar()
+    {
+        yield return new WaitForSeconds(0.2f);
+        ActualizarEstadoAnimacionAlzando(false);
+        animadorHijo.SetBool("Lanzando", false);
     }
 }

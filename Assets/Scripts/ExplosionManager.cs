@@ -43,6 +43,32 @@ public class ExplosionManager : MonoBehaviour
         StartCoroutine(CapturarYMezclarJugadores());
     }
 
+    public void ActivarAnimacionTristeTemporizada(GameObject jugador)
+    {
+        if (jugador != null)
+        {
+            StartCoroutine(ManejarAnimacionTriste(jugador));
+        }
+    }
+
+    private IEnumerator ManejarAnimacionTriste(GameObject jugador)
+    {
+        Animator anim = jugador.GetComponent<Animator>();
+        if (anim == null) anim = jugador.GetComponentInChildren<Animator>();
+
+        if (anim != null)
+        {
+            anim.SetBool("Triste", true);
+
+            yield return new WaitForSeconds(2f);
+
+            if (anim != null) 
+            {
+                anim.SetBool("Triste", false);
+            }
+        }
+    }
+
     private IEnumerator CapturarYMezclarJugadores()
     {
         yield return new WaitForSeconds(0.25f);
@@ -120,6 +146,9 @@ public class ExplosionManager : MonoBehaviour
         MovimientoPersonaje mov = primerJugador.GetComponent<MovimientoPersonaje>();
 
         if (mov != null) mov.enabled = false;
+        Animator anim = primerJugador.GetComponent<Animator>();
+        if (anim == null) anim = primerJugador.GetComponentInChildren<Animator>();
+        if (anim != null) anim.SetBool("Caminando", true);
 
         for (int i = 0; i < puntosRecorrido.Length; i++)
         {
@@ -144,6 +173,8 @@ public class ExplosionManager : MonoBehaviour
                 yield return null;
             }
         }
+
+        if (anim != null) anim.SetBool("Caminando", false);
 
         if (cc != null) cc.enabled = false;
         primerJugador.transform.rotation = Quaternion.Euler(0f, -180f, 0f);
@@ -192,6 +223,11 @@ public class ExplosionManager : MonoBehaviour
         MovimientoPersonaje mov = jugador.GetComponent<MovimientoPersonaje>();
 
         if (mov != null) mov.enabled = false;
+
+        // 🔥 NUEVO: Buscamos el Animator y encendemos "Caminando" al iniciar el regreso
+        Animator anim = jugador.GetComponent<Animator>();
+        if (anim == null) anim = jugador.GetComponentInChildren<Animator>();
+        if (anim != null) anim.SetBool("Caminando", true);
 
         for (int i = 0; i < puntosRegreso.Length; i++)
         {
@@ -245,9 +281,11 @@ public class ExplosionManager : MonoBehaviour
             if (cc != null) cc.enabled = true;
         }
 
+        // 🔥 NUEVO: Apagamos "Caminando" cuando toma asiento de nuevo en la fila
+        if (anim != null) anim.SetBool("Caminando", false);
+
         StartCoroutine(IniciarRecorridoPrimerJugador());
     }
-
     public void AvanzarFilaCompleta()
     {
         if (listaJugadoresObjetos.Count <= 1) return;
@@ -276,6 +314,11 @@ public class ExplosionManager : MonoBehaviour
 
         if (mov != null) mov.enabled = false;
 
+        // 🔥 NUEVO: Encendemos "Caminando" para este jugador secundario que adelanta su puesto
+        Animator anim = jugador.GetComponent<Animator>();
+        if (anim == null) anim = jugador.GetComponentInChildren<Animator>();
+        if (anim != null) anim.SetBool("Caminando", true);
+
         while (Vector3.Distance(jugador.transform.position, destino.position) > 0.15f)
         {
             if (jugador == null) yield break;
@@ -294,11 +337,13 @@ public class ExplosionManager : MonoBehaviour
             yield return null;
         }
 
+        // 🔥 NUEVO: Se frena la animación al llegar a su nuevo asiento
+        if (anim != null) anim.SetBool("Caminando", false);
+
         if (cc != null) cc.enabled = false;
         jugador.transform.rotation = destino.rotation;
         if (cc != null) cc.enabled = true;
     }
-
     public void LanzarJugadorVolando(GameObject jugador)
     {
         if (puntoDestinoMuerte == null)
@@ -348,11 +393,8 @@ public class ExplosionManager : MonoBehaviour
 
         Debug.Log($"[ExplosionManager] {jugador.name} aterrizó en su destino final.");
 
-        // Al terminar el vuelo del eliminado, procesamos el inicio del turno de los sobrevivientes
         FinalizarResolucionMuerte();
     }
-
-    // <-- NUEVOS MÉTODOS DE CONTROL PARA LOS DOS CAMINOS -->
 
     public bool VerificarFinDeRondaLimpia()
     {
@@ -374,25 +416,21 @@ public class ExplosionManager : MonoBehaviour
     {
         jugadoresQueYaPasaron = 0;
 
-        // CAMINO 2: Se remueve al jugador de la lista de espera para siempre
         listaJugadoresObjetos.Remove(jugadorEliminado);
         CamaraExplosion.Instancia.DispararVibracion();
 
-        // Se lanza el vuelo físico exacto que ya tenías
         LanzarJugadorVolando(jugadorEliminado);
     }
 
 
     private void FinalizarResolucionMuerte()
     {
-        // SI QUEDA EXACTAMENTE UN JUGADOR: Activamos la secuencia de victoria temporizada
         if (listaJugadoresObjetos.Count == 1)
         {
             StartCoroutine(CorrutinaSecuenciaVictoriaDramatica());
-            return; // Cortamos el flujo normal aquí
+            return;
         }
 
-        // Si quedan 2 o más jugadores sobrevivientes, el juego continúa normal
         if (listaJugadoresObjetos.Count > 1)
         {
             PerillasManager.Instancia.IniciarNuevaRondaTablero();
@@ -424,12 +462,11 @@ public class ExplosionManager : MonoBehaviour
         if (scriptMov != null)
         {
             idGanador = scriptMov.ObtenerID();
-            scriptMov.enabled = false; // Congelamos sus controles para la foto de campeón
+            scriptMov.enabled = false;
         }
 
         Debug.Log($"[ExplosionManager] Secuencia de Victoria: Enfocando al campeón {jugadorGanador.name}...");
 
-        // 1. La cámara gira suavemente y clava la mirada en el ganador en la cocina
         if (CamaraExplosion.Instancia != null)
         {
             CamaraExplosion.Instancia.EnfocarGanadorAbsoluto(jugadorGanador.transform);
@@ -451,26 +488,22 @@ public class ExplosionManager : MonoBehaviour
 
             Debug.Log("[ExplosionManager] ¡Es el fin del torneo! Transicionando al set de gala 3D...");
 
-            // Iniciamos la ceremonia. Al estar en el mismo Canvas, ella sola llamará a CanvasManager.Instancia
             secuenciaPremiacion.IniciarCeremoniaCampeon(idGanador, () => {
                 galaFinalizada = true;
             });
 
-            // Nos quedamos congelados aquí mientras ven el trofeo 3D y la luz girando
             yield return new WaitUntil(() => galaFinalizada);
         }
         else
         {
             Debug.Log("[ExplosionManager] Tiempo cumplido. Desplegando panel de trofeos de ronda normal.");
 
-            // Usamos el Singleton del CanvasManager que dejaste intacto
             if (CanvasManager.Instancia != null)
             {
                 CanvasManager.Instancia.MostrarPantallaVictoria(idGanador, false);
             }
         }
 
-        // 3. Recién ahora le avisamos al Gestor que sume la copa de forma oficial en los datos
         if (GestorVictorias.Instancia != null)
         {
             GestorVictorias.Instancia.RegistrarVictoriaRonda(idGanador);

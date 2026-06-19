@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,6 +21,9 @@ public class SaludManager : MonoBehaviour
     [Header("Efecto de Agonía")]
     [SerializeField] private GameObject[] contenedoresPerfilesHUD;
     [SerializeField] private float velocidadPalpitacion = 8f;
+
+    // 🔥 VARIABLE DE SEGURIDAD: Evita duplicar el código de victoria en el mismo frame
+    private bool victoriaProcesada = false;
 
     void Awake()
     {
@@ -137,6 +141,28 @@ public class SaludManager : MonoBehaviour
             {
                 jugadorAfectado.saludActual = jugadorAfectado.saludActual - Danio;
                 jugadorAfectado.saludActual = Mathf.Clamp(jugadorAfectado.saludActual, 0f, jugadorAfectado.saludMaxima);
+
+                if (jugadorAfectado.scriptMovimiento != null && jugadorAfectado.saludActual > 0f)
+                {
+                    jugadorAfectado.scriptMovimiento.FrenarPorLanzamiento();
+
+                    Animator animReal = null;
+                    Animator[] todosLosAnimadores = jugadorAfectado.scriptMovimiento.GetComponentsInChildren<Animator>();
+                    foreach (Animator anim in todosLosAnimadores)
+                    {
+                        if (anim != null && anim.runtimeAnimatorController != null)
+                        {
+                            animReal = anim;
+                            break;
+                        }
+                    }
+
+                    if (animReal != null)
+                    {
+                        StartCoroutine(SecuenciaHerido(animReal));
+                    }
+                }
+
                 if (CanvasManager.Instancia != null)
                 {
                     CanvasManager.Instancia.actualizarBarraVida(IDJugador);
@@ -148,6 +174,14 @@ public class SaludManager : MonoBehaviour
                 }
             }
         }
+    }
+
+    private IEnumerator SecuenciaHerido(Animator anim)
+    {
+        anim.SetBool("Herido", true);
+        yield return null;
+        yield return new WaitForSeconds(0.6f);
+        anim.SetBool("Herido", false);
     }
 
     public void CurarSalud(int IDJugador, int cantidadCura)
@@ -185,11 +219,49 @@ public class SaludManager : MonoBehaviour
         {
             jugador.scriptMovimiento.LimpiarEfectos();
             jugador.scriptMovimiento.enabled = false;
+
             CharacterController cc = jugador.scriptMovimiento.GetComponent<CharacterController>();
             if (cc != null)
             {
                 cc.enabled = false;
             }
+            Animator animReal = null;
+            Animator[] todosLosAnimadores = jugador.scriptMovimiento.GetComponentsInChildren<Animator>();
+            foreach (Animator anim in todosLosAnimadores)
+            {
+                if (anim != null && anim.runtimeAnimatorController != null)
+                {
+                    animReal = anim;
+                    break;
+                }
+            }
+
+            if (animReal != null)
+            {
+                animReal.SetBool("Muriendo", true);
+            }
+            SondosManager.Instancia.PlaySFXPorIndice(12);
+            StartCoroutine(SecuenciaDesaparecerPorMuerte(jugador));
+        }
+    }
+
+    // 🔥 MODIFICADO: Espera la pausa dramática de 3 segundos antes de registrar oficialmente
+    private IEnumerator SecuenciaRetrasoPremios(int idGanador)
+    {
+        yield return new WaitForSeconds(3f);
+
+        if (GestorVictorias.Instancia != null)
+        {
+            GestorVictorias.Instancia.RegistrarVictoriaRonda(idGanador);
+        }
+    }
+
+    private IEnumerator SecuenciaDesaparecerPorMuerte(DatosJugador jugador)
+    {
+        yield return new WaitForSeconds(5f);
+
+        if (jugador.scriptMovimiento != null)
+        {
             jugador.scriptMovimiento.transform.position = new Vector3(0f, -100f, 0f);
             Renderer[] renders = jugador.scriptMovimiento.GetComponentsInChildren<Renderer>();
             for (int i = 0; i < renders.Length; i++)
@@ -202,8 +274,11 @@ public class SaludManager : MonoBehaviour
         }
     }
 
+    // 🔥 MODIFICADO: Sistema blindado con cerrojo para evitar el bug de las dos victorias
     private void VerificarCondicionVictoria()
     {
+        if (victoriaProcesada) return;
+
         List<DatosJugador> sobrevivientes = new List<DatosJugador>();
         for (int i = 0; i < listaJugadores.Count; i++)
         {
@@ -218,20 +293,19 @@ public class SaludManager : MonoBehaviour
                 }
             }
         }
+
         if (sobrevivientes.Count == 1)
         {
+            victoriaProcesada = true; // Bloqueamos futuras lecturas duplicadas
+            SondosManager.Instancia.PlaySFXPorIndice(10);
+
             int idGanador = sobrevivientes[0].idJugador;
-            if (GestorVictorias.Instancia != null)
-            {
-                GestorVictorias.Instancia.RegistrarVictoriaRonda(idGanador);
-            }
+            StartCoroutine(SecuenciaRetrasoPremios(idGanador));
         }
         else if (sobrevivientes.Count == 0)
         {
-            if (GestorVictorias.Instancia != null)
-            {
-                GestorVictorias.Instancia.RegistrarVictoriaRonda(0);
-            }
+            victoriaProcesada = true; // Bloqueamos futuras lecturas en empate
+            StartCoroutine(SecuenciaRetrasoPremios(0));
         }
     }
 

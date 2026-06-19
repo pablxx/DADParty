@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine.InputSystem;
+using System.Collections;
 
 public class LobbyManager : MonoBehaviour
 {
@@ -151,7 +152,7 @@ public class LobbyManager : MonoBehaviour
         int indicePedestal = idReal - 1;
         if (indicePedestal >= 0 && indicePedestal < pedestalesVisuales.Length && pedestalesVisuales[indicePedestal] != null)
         {
-            // 🔥 CORRECCIÓN: Ahora pasa correctamente el parámetro idReal
+
             pedestalesVisuales[indicePedestal].MostrarPersonajePorSlot(slotInicialLibre, idReal);
         }
 
@@ -264,29 +265,51 @@ public class LobbyManager : MonoBehaviour
             Debug.Log("Proximamente......");
             return;
         }
+
+        // Reproduce la voz correspondiente según la ID
+        if (SondosManager.Instancia != null)
+        {
+            SondosManager.Instancia.ReproducirVozConfirmacionPorJugador(idJugador);
+        }
+
         int indicePedestal = idJugador - 1;
         if (indicePedestal >= 0 && indicePedestal < pedestalesVisuales.Length && pedestalesVisuales[indicePedestal] != null)
         {
             pedestalesVisuales[indicePedestal].ActivarSaludo();
         }
+
         eleccionesPersonajes[idJugador - 1] = slotElegido;
         AsignarPersonajeAlGestor(idJugador, slotElegido);
         jugadoresListos++;
 
+        // 🔥 MODIFICADO: Si todos están listos, llamamos a la corrutina temporizada
         if (jugadoresListos >= limiteMaximoJugadores)
         {
-            Debug.Log("Todos listos saltando a la escena de juego...");
-            if (MenuMinijuegosManager.MinijuegoElegido == 1)
-            {
-                Debug.Log("[Lobby] Interceptando variable de juego para cargar: JuegoExplosion");
-                escenaJUEGO = "JuegoExplosion";
-            }
-            else
-            {
-                Debug.Log("[Lobby] Manteniendo escena tradicional por defecto.");
-            }
-            SceneManager.LoadScene(escenaJUEGO);
+            StartCoroutine(SecuenciaRetrasoCargaJuego());
         }
+    }
+
+    private IEnumerator SecuenciaRetrasoCargaJuego()
+    {
+        Debug.Log($"[LobbyManager] ¡Todos los jugadores confirmados! Esperando 2 segundos de cortesía...");
+
+        // Esperamos exactamente los 2 segundos que nos pediste
+        yield return new WaitForSeconds(2f);
+
+        Debug.Log("Todos listos saltando a la escena de juego...");
+
+        if (MenuMinijuegosManager.MinijuegoElegido == 1)
+        {
+            Debug.Log("[Lobby] Interceptando variable de juego para cargar: JuegoExplosion");
+            escenaJUEGO = "JuegoExplosion";
+        }
+        else
+        {
+            Debug.Log("[Lobby] Manteniendo escena tradicional por defecto.");
+        }
+
+        SondosManager.Instancia.CalmarTodosLosEfectos();
+        GestorCarga.CambiarDeEscena(escenaJUEGO, 3f);
     }
 
     public bool EstaSlotLibre(int slotAComprobar, int idJugadorConsultante)

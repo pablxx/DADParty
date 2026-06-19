@@ -11,10 +11,16 @@ public class MenuInicioManager : MonoBehaviour
     {
         if (Instancia != null && Instancia != this)
         {
+           
             Destroy(gameObject);
             return;
         }
         Instancia = this;
+    }
+
+    private void Start()
+    {
+        SondosManager.Instancia.PlaySFXPorIndice(0);
     }
 
     public void PasarALaSiguienteEscena(GameObject objetoJugador)
