@@ -21,11 +21,20 @@ EditorBuildSettings:
     path: Assets/Scenes/CantidadJugadores.unity
     guid: 601a0493a6ea99e4d8e0b8ce389af295
   - enabled: 1
+    path: Assets/Scenes/SeleccionMinijuego.unity
+    guid: 87054b5efc3646e44ad96ce1afce4789
+  - enabled: 1
     path: Assets/Scenes/Lobby.unity
     guid: f32dfa7bc8d2b5f4582a1aed2f444c1e
   - enabled: 1
     path: Assets/Scenes/EscenarioHarold.unity
     guid: 4014bd344406d4f479d310a73f3bbaa2
+  - enabled: 1
+    path: Assets/Scenes/JuegoExplosion.unity
+    guid: b99f8e75a3a05984f9c7ce16832f7953
+  - enabled: 1
+    path: Assets/Scenes/Carga.unity
+    guid: 2bd4fb31784c9a04c88a3a3e2f0fdc53
   m_configObjects:
-    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: da0e9af174b7fab469202ec9c35f5eef, type: 3}
+    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 0017d32092764c24cb2866d1455246c1, type: 3}
   m_UseUCBPForAssetBundles: 0

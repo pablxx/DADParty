@@ -18,6 +18,12 @@ public class cajasManager : MonoBehaviour
     public int IDJugador;
     public int cantidadDanio;
 
+    [Header("Prefabs de los Envases")]
+    [SerializeField] private GameObject prefabComun;
+    [SerializeField] private GameObject prefabAceite;
+    [SerializeField] private GameObject prefabLlajua;
+    [SerializeField] private GameObject prefabMiel;
+
     private int aleatorio;
 
     void Start()
@@ -47,34 +53,38 @@ public class cajasManager : MonoBehaviour
             tipoActual = TipoObjeto.miel;
         }
 
-        MeshRenderer rendererCaja = GetComponent<MeshRenderer>();
-        if (rendererCaja != null)
+        GameObject prefabAInstanciar = null;
+
+        switch (tipoActual)
         {
-            switch (tipoActual)
-            {
-                case TipoObjeto.comun:
-                    rendererCaja.material.color = Color.white;
-                    cantidadDanio = 100;
-                    break;
+            case TipoObjeto.comun:
+                cantidadDanio = 100;
+                prefabAInstanciar = prefabComun;
+                break;
 
-                case TipoObjeto.aceite:
-                    rendererCaja.material.color = Color.yellow;
-                    cantidadDanio = 20;
-                    break;
+            case TipoObjeto.aceite:
+                cantidadDanio = 20;
+                prefabAInstanciar = prefabAceite;
+                break;
 
-                case TipoObjeto.llajua:
-                    rendererCaja.material.color = Color.red;
-                    cantidadDanio = 30;
-                    break;
+            case TipoObjeto.llajua:
+                cantidadDanio = 30;
+                prefabAInstanciar = prefabLlajua;
+                break;
 
-                case TipoObjeto.miel:
-                    rendererCaja.material.color = Color.green;
-                    cantidadDanio = 20;
-                    break;
+            case TipoObjeto.miel:
+                cantidadDanio = 20;
+                prefabAInstanciar = prefabMiel;
+                break;
 
-                default:
-                    break;
-            }
+            default:
+                break;
+        }
+
+        if (prefabAInstanciar != null)
+        {
+            GameObject envase = Instantiate(prefabAInstanciar, transform.position, transform.rotation);
+            envase.transform.SetParent(transform);
         }
     }
 }

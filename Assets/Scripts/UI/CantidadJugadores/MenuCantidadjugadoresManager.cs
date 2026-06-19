@@ -17,10 +17,16 @@ public class MenuCantidadJugadoresManager : MonoBehaviour
     float escalaNormal = 1.0f;
     [SerializeField]
     float escalaAumentada = 1.15f;
+
+    // CORRECCIÓN: Ahora apunta a la nueva escena de selección de mapas
     [SerializeField]
-    string escenaSiguienteSELECCION = "04_SeleccionPersonaje";
+    string escenaSiguienteMINIJUEGOS = "02_SeleccionMinijuego";
 
     int indiceActual = 0;
+
+    [Header("Configuración Palpitación")]
+    [SerializeField] private float velocidadPalpitacion = 5f;
+    [SerializeField] private float amplitudPalpitacion = 0.05f;
 
     void Awake()
     {
@@ -41,8 +47,18 @@ public class MenuCantidadJugadoresManager : MonoBehaviour
             FichaModoJuego scriptModo = jugador1.GetComponent<FichaModoJuego>();
             if (scriptModo != null)
             {
-                scriptModo.enabled = true;
+                scriptModo.ResetearFicha();
             }
+        }
+    }
+
+    void Update()
+    {
+        if (opcionesCantidad != null && opcionesCantidad.Count > 0 && opcionesCantidad[indiceActual] != null)
+        {
+            float factorPalpitacion = 1f + Mathf.Sin(Time.time * velocidadPalpitacion) * amplitudPalpitacion;
+            float escalaFinal = escalaAumentada * factorPalpitacion;
+            opcionesCantidad[indiceActual].transform.localScale = new Vector3(escalaFinal, escalaFinal, 1f);
         }
     }
 
@@ -106,6 +122,6 @@ public class MenuCantidadJugadoresManager : MonoBehaviour
         {
             Debug.LogError(" No se encontró la Instancia de 'GestorVictorias' en la escena");
         }
-        SceneManager.LoadScene(escenaSiguienteSELECCION);
+        GestorCarga.CambiarDeEscena(escenaSiguienteMINIJUEGOS, 1f);
     }
 }

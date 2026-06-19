@@ -9,7 +9,11 @@ public class FichaModoJuego : MonoBehaviour
     {
         if (value.isPressed == true)
         {
-            if (MenuModosManager.Instancia != null)
+            if (MenuMinijuegosManager.Instancia != null)
+            {
+                MenuMinijuegosManager.Instancia.MoverSeleccion(-1);
+            }
+            else if (MenuModosManager.Instancia != null)
             {
                 MenuModosManager.Instancia.MoverSeleccion(-1);
             }
@@ -24,7 +28,11 @@ public class FichaModoJuego : MonoBehaviour
     {
         if (value.isPressed == true)
         {
-            if (MenuModosManager.Instancia != null)
+            if (MenuMinijuegosManager.Instancia != null)
+            {
+                MenuMinijuegosManager.Instancia.MoverSeleccion(1);
+            }
+            else if (MenuModosManager.Instancia != null)
             {
                 MenuModosManager.Instancia.MoverSeleccion(1);
             }
@@ -41,7 +49,11 @@ public class FichaModoJuego : MonoBehaviour
         {
             if (yaConfirmo == false)
             {
-                if (MenuModosManager.Instancia != null)
+                if (MenuMinijuegosManager.Instancia != null)
+                {
+                    MenuMinijuegosManager.Instancia.ConfirmarSeleccionActual();
+                }
+                else if (MenuModosManager.Instancia != null)
                 {
                     MenuModosManager.Instancia.ConfirmarSeleccionActual();
                 }

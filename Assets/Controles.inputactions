@@ -32,6 +32,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Accionar",
+                    "type": "Button",
+                    "id": "f1d91101-7a3b-4a20-b110-3a5a3fb070da",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -294,7 +303,7 @@
                     "path": "<HID::4-Axis,12-Button with POV>/button3",
                     "interactions": "Press(pressPoint=0.1)",
                     "processors": "",
-                    "groups": ";Mando2",
+                    "groups": ";Mando",
                     "action": "Jump",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -338,8 +347,41 @@
                     "path": "<HID::4-Axis,12-Button with POV>/button2",
                     "interactions": "",
                     "processors": "",
-                    "groups": ";Mando2",
+                    "groups": ";Mando",
                     "action": "Agarrar",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2c70893c-ea91-47cf-9ba8-97efe1e0814d",
+                    "path": "<Keyboard>/f",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Teclado1",
+                    "action": "Accionar",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "dd96ee40-c2e1-464f-9289-693652b21080",
+                    "path": "<HID::Microntek              USB Joystick          >/button6",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Mando",
+                    "action": "Accionar",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "71f319ea-28c6-492b-b6cd-342abeb15eef",
+                    "path": "<HID::4-Axis,12-Button with POV>/button6",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Mando",
+                    "action": "Accionar",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

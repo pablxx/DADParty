@@ -19,6 +19,7 @@ public class PoolEfectos : MonoBehaviour
     List<GameObject> poolMiel = new List<GameObject>();
     List<GameObject> poolAceite = new List<GameObject>();
     List<GameObject> poolLlajua = new List<GameObject>();
+    private int contadorLanzamientos = 0;
 
     void Awake()
     {
@@ -113,13 +114,17 @@ public class PoolEfectos : MonoBehaviour
     {
         if (tipo != TipoObjeto.comun)
         {
-            Vector3 posicionSueloExacta = new Vector3(posicionImpacto.x, alturaFijaSuelo, posicionImpacto.z);
+            float pasoMilimetrico = 0.001f;
+            float alturaCalculada = alturaFijaSuelo + (contadorLanzamientos * pasoMilimetrico);
+
+            Vector3 posicionSueloExacta = new Vector3(posicionImpacto.x, alturaCalculada, posicionImpacto.z);
+
             GameObject charco = ObtenerEfecto(tipo, posicionSueloExacta);
             if (charco != null)
             {
                 charco.SetActive(true);
-                StartCoroutine(DesactivarEfecto(charco, 5f));
             }
+            contadorLanzamientos = (contadorLanzamientos + 1) % 10;
         }
     }
 

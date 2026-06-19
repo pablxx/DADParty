@@ -6,7 +6,7 @@ public class MovimientoPersonaje : MonoBehaviour
 {
     [Header("Configuracion de Movimiento")]
     [SerializeField]
-    float velocidad;
+    public float velocidad;
     [SerializeField]
     float fuerzaSalto;
     [SerializeField]
@@ -28,6 +28,9 @@ public class MovimientoPersonaje : MonoBehaviour
     float tiempoRestanteLlajua = 0f;
     float multiplicadorVelocidadLlajua = 2f;
     int IDpersonaje;
+    float tiempoInmovilLanzamiento = 0f;
+    private Animator animadorHijo;
+    private bool yaTieneModeloCargado = false;
 
     void Start()
     {
@@ -43,6 +46,9 @@ public class MovimientoPersonaje : MonoBehaviour
             GestorVictorias.Instancia.RegistrarPersonajeEnTorneo(IDpersonaje, this.gameObject);
         }
         ForzarRegistroEnSaludActual();
+
+        // Intenta buscar el animador por si ya existiera un modelo acoplado
+        ActualizarReferenciaAnimador();
     }
 
     void Update()
@@ -59,8 +65,43 @@ public class MovimientoPersonaje : MonoBehaviour
                 AplicarGravedad();
                 Mover();
                 Rotar();
+                ManejarAnimacionCaminando();
             }
         }
+    }
+
+    public bool ObtenerEstadoModelo()
+    {
+        return yaTieneModeloCargado;
+    }
+
+    public void MarcarModeloComoCargado()
+    {
+        yaTieneModeloCargado = true;
+    }
+
+    private void ManejarAnimacionCaminando()
+    {
+        if (animadorHijo == null)
+        {
+            ActualizarReferenciaAnimador();
+        }
+
+        if (animadorHijo != null)
+        {
+            bool seEstaMoviendo = direccionInput.magnitude > 0.1f && tiempoInmovilLanzamiento <= 0f;
+            if (estaQuemando == true)
+            {
+                seEstaMoviendo = true;
+            }
+
+            animadorHijo.SetBool("Caminando", seEstaMoviendo);
+        }
+    }
+
+    public void ActualizarReferenciaAnimador()
+    {
+        animadorHijo = GetComponentInChildren<Animator>();
     }
 
     public void ForzarRegistroEnSaludActual()
@@ -86,6 +127,11 @@ public class MovimientoPersonaje : MonoBehaviour
 
     private void ManejarTiemposEfectos()
     {
+        if (tiempoInmovilLanzamiento > 0f)
+        {
+            tiempoInmovilLanzamiento = tiempoInmovilLanzamiento - Time.deltaTime;
+        }
+
         if (estaDeslizando == true)
         {
             tiempoRestanteAceite = tiempoRestanteAceite - Time.deltaTime;
@@ -110,7 +156,11 @@ public class MovimientoPersonaje : MonoBehaviour
         if (controller == null) return;
         if (controller.enabled == false) return;
         Vector3 direccion3D = new Vector3(direccionInput.x, 0f, direccionInput.y) * (velocidad * factorVelocidad);
-        if (estaQuemando == true)
+        if (tiempoInmovilLanzamiento > 0f)
+        {
+            direccion3D = Vector3.zero;
+        }
+        else if (estaQuemando == true)
         {
             direccion3D = transform.forward * (velocidad * multiplicadorVelocidadLlajua);
         }
@@ -126,6 +176,7 @@ public class MovimientoPersonaje : MonoBehaviour
             }
             direccion3D = velocidadInercial;
         }
+
         vectorMovimiento = new Vector3(direccion3D.x, velocidadVertical, direccion3D.z);
         controller.Move(vectorMovimiento * Time.deltaTime);
     }
@@ -152,12 +203,20 @@ public class MovimientoPersonaje : MonoBehaviour
 
     private void Rotar()
     {
+       
+        if (tiempoInmovilLanzamiento > 0f) return;
+
         Vector3 direccion3D = new Vector3(direccionInput.x, 0f, direccionInput.y);
         if (direccion3D.magnitude > 0.1f)
         {
             Quaternion rotacionDestino = Quaternion.LookRotation(direccion3D);
             transform.rotation = Quaternion.Slerp(transform.rotation, rotacionDestino, Time.deltaTime * velocidadRotacion);
         }
+    }
+
+    public void FrenarPorLanzamiento()
+    {
+        tiempoInmovilLanzamiento = 0.5f;
     }
 
     public void AplicarEfectoMiel(float nuevoFactorVelocidad, bool estadoSalto)
@@ -191,18 +250,22 @@ public class MovimientoPersonaje : MonoBehaviour
         tiempoRestanteAceite = 0f;
         estaQuemando = false;
         tiempoRestanteLlajua = 0f;
+        tiempoInmovilLanzamiento = 0f; 
     }
 
     void OnMove(InputValue value)
     {
         direccionInput = value.Get<Vector2>();
     }
+
     void OnJump(InputValue value)
     {
         if (controller == null)
         {
             controller = GetComponent<CharacterController>();
         }
+
+        if (tiempoInmovilLanzamiento > 0f) return;
 
         if (value.isPressed == true)
         {
@@ -221,6 +284,7 @@ public class MovimientoPersonaje : MonoBehaviour
             }
         }
     }
+
     public void OnConfirmar()
     {
         if (CanvasManager.Instancia != null)

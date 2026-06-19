@@ -10,7 +10,7 @@ public class MenuModosManager : MonoBehaviour
 {
     public static MenuModosManager Instancia;
 
-    [SerializeField] 
+    [SerializeField]
     List<Image> elementosMenu = new List<Image>();
     [SerializeField]
     Color colorSeleccionado = new Color(1f, 0f, 0f, 1f);
@@ -42,7 +42,11 @@ public class MenuModosManager : MonoBehaviour
     [Header("Toggle")]
     [SerializeField] private Toggle toggleFullscreen;
     [Header("Audio Mixer")]
-    [SerializeField] private AudioMixer audioMixer; 
+    [SerializeField] private AudioMixer audioMixer;
+
+    [Header("Configuración Palpitación")]
+    [SerializeField] private float velocidadPalpitacion = 5f;
+    [SerializeField] private float amplitudPalpitacion = 0.05f;
 
     void Awake()
     {
@@ -79,6 +83,12 @@ public class MenuModosManager : MonoBehaviour
                     CerrarOpciones();
                 }
             }
+        }
+
+        if (opcionesAbiertas == false && elementosMenu[indiceActual] != null)
+        {
+            float factorPalpitacion = 1f + Mathf.Sin(Time.time * velocidadPalpitacion) * amplitudPalpitacion;
+            elementosMenu[indiceActual].transform.localScale = Vector3.one * (escalaAumentada * factorPalpitacion);
         }
     }
 

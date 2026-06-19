@@ -23,6 +23,6 @@ public class MenuInicioManager : MonoBehaviour
         {
             GestorVictorias.Instancia.RegistrarPersonajeEnTorneo(1, objetoJugador);
         }
-        SceneManager.LoadScene(nombreProximaEscena);
+        GestorCarga.CambiarDeEscena("MenuPrincipal" , 1f);
     }
 }

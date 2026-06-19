@@ -31,7 +31,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -1.1816108, y: 1.04, z: 0.20329246}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -43,7 +43,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8205408151085852917}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 0}
 --- !u!23 &6973394749489889495
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -107,6 +107,10 @@ MonoBehaviour:
   Tomado: 0
   IDJugador: 0
   cantidadDanio: 0
+  prefabComun: {fileID: 6971273780246126776, guid: 41226ae77e046014fb04ea3cd5250ade, type: 3}
+  prefabAceite: {fileID: 7437237736114411759, guid: 1678a23b5499db14e8b1144941b739bc, type: 3}
+  prefabLlajua: {fileID: 7459892322727806639, guid: b4d217d39f0094d458ae3bf3a7125698, type: 3}
+  prefabMiel: {fileID: 5356232816974753123, guid: 7454a4429746c4442b768c0054999884, type: 3}
 --- !u!65 &954790968910206659
 BoxCollider:
   m_ObjectHideFlags: 0

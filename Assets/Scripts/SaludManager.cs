@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SaludManager : MonoBehaviour
 {
@@ -16,6 +17,9 @@ public class SaludManager : MonoBehaviour
     }
 
     [SerializeField] private List<DatosJugador> listaJugadores = new List<DatosJugador>();
+    [Header("Efecto de Agonía")]
+    [SerializeField] private GameObject[] contenedoresPerfilesHUD;
+    [SerializeField] private float velocidadPalpitacion = 8f;
 
     void Awake()
     {
@@ -38,6 +42,47 @@ public class SaludManager : MonoBehaviour
             }
         }
     }
+
+    void Update()
+    {
+        ManejarEfectoPalpitacionAgonia();
+    }
+
+    private void ManejarEfectoPalpitacionAgonia()
+    {
+        if (contenedoresPerfilesHUD == null || contenedoresPerfilesHUD.Length == 0) return;
+        float factorOnda = (Mathf.Sin(Time.time * velocidadPalpitacion) + 1f) * 0.5f;
+        Color colorRojoPalpitante = Color.Lerp(Color.white, Color.red, factorOnda);
+        for (int i = 0; i < listaJugadores.Count; i++)
+        {
+            DatosJugador jugador = listaJugadores[i];
+            if (jugador == null) continue;
+
+            int indiceHUD = jugador.idJugador - 1;
+
+            if (indiceHUD >= 0 && indiceHUD < contenedoresPerfilesHUD.Length && contenedoresPerfilesHUD[indiceHUD] != null)
+            {
+                GameObject contenedor = contenedoresPerfilesHUD[indiceHUD];
+                Image[] imagenesDelPerfil = contenedor.GetComponentsInChildren<Image>(true);
+
+                if (jugador.saludActual < 40f && !jugador.estaMuerto)
+                {
+                    foreach (Image img in imagenesDelPerfil)
+                    {
+                        if (img != null) img.color = colorRojoPalpitante;
+                    }
+                }
+                else
+                {
+                    foreach (Image img in imagenesDelPerfil)
+                    {
+                        if (img != null && img.color != Color.white) img.color = Color.white;
+                    }
+                }
+            }
+        }
+    }
+
     private static int CompararPorID(DatosJugador x, DatosJugador y)
     {
         if (x == null && y == null) return 0;

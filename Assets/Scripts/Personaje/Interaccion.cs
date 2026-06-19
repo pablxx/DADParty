@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static UnityEngine.Rendering.DebugUI;
 public class Interaccion : MonoBehaviour
 {
     [SerializeField]
@@ -36,7 +37,37 @@ public class Interaccion : MonoBehaviour
             }
         }
     }
+    void OnAccionar(InputValue value)
+    {
+        if (value.isPressed && PerillasManager.Instancia != null)
+        {
+            // Reducimos el radio a 1.2f para que sea más preciso y no capte todo el mapa
+            Collider[] colisionadores = Physics.OverlapSphere(transform.position, 1.2f);
 
+            PerillaObjeto perillaMasCercana = null;
+            float distanciaMinima = Mathf.Infinity;
+
+            for (int i = 0; i < colisionadores.Length; i++)
+            {
+                PerillaObjeto perilla = colisionadores[i].GetComponent<PerillaObjeto>();
+                if (perilla != null)
+                {
+                    float distancia = Vector3.Distance(transform.position, colisionadores[i].transform.position);
+                    if (distancia < distanciaMinima)
+                    {
+                        distanciaMinima = distancia;
+                        perillaMasCercana = perilla;
+                    }
+                }
+            }
+
+            // Solo disparamos la acción en la que esté físicamente más pegada a ti
+            if (perillaMasCercana != null)
+            {
+                perillaMasCercana.onAgarrar(gameObject);
+            }
+        }
+    }
     void Update()
     {
         if (enVuelo)
@@ -147,6 +178,11 @@ public class Interaccion : MonoBehaviour
 
     void lanzarObjeto()
     {
+        MovimientoPersonaje movimiento = GetComponent<MovimientoPersonaje>();
+        if (movimiento != null)
+        {
+            movimiento.FrenarPorLanzamiento();
+        }
         caja.transform.SetParent(null);
         Vector3 direccion = (transform.forward + Vector3.up * 0.6f).normalized;
         velocidadActualCaja = direccion * fuerzaLanzamiento;

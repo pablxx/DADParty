@@ -13,13 +13,23 @@ public class LobbyManager : MonoBehaviour
     [SerializeField]
     List<TextMeshProUGUI> textosSlots = new List<TextMeshProUGUI>();
     [SerializeField]
-    Color colorSeleccionado = new Color(1f, 0f, 0f, 1f);
+    Color colorSeleccionado = new Color(1f, 0f, 0f, 1f); // Se mantiene por compatibilidad, pero ahora es dinámico
     [SerializeField]
-    float escalaNormal = 1.0f;
+    float escalaNormal = 1.5f;       // Modificado de entrada a 1.5
     [SerializeField]
-    float escalaAumentada = 1.15f;
+    float escalaAumentada = 1.72f;   // Escalado proporcionalmente
     [SerializeField]
     string escenaJUEGO;
+
+    [Header("Efecto Cosmético de Caída")]
+    [SerializeField] private VisualCaidaLobby[] pedestalesVisuales = new VisualCaidaLobby[4];
+
+    [Header("Configuración de Colores por Jugador")]
+    [SerializeField] private List<Color> coloresJugadores = new List<Color>() { Color.cyan, Color.green, Color.yellow, Color.magenta };
+
+    [Header("Configuración Palpitación Textos")]
+    [SerializeField] private float velocidadPalpitacion = 6f;
+    [SerializeField] private float amplitudPalpitacion = 0.08f;
 
     int jugadoresConectados = 1;
     int jugadoresListos = 0;
@@ -75,6 +85,20 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
+    void Update()
+    {
+        float factorPalpitacion = 1f + Mathf.Sin(Time.time * velocidadPalpitacion) * amplitudPalpitacion;
+        for (int i = 0; i < textosSlots.Count; i++)
+        {
+            if (textosSlots[i] != null && textosSlots[i].text != "")
+            {
+                float tiempoDesfasado = Time.time * velocidadPalpitacion + (i * 1.5f);
+                float factorIndividual = 1f + Mathf.Sin(tiempoDesfasado) * amplitudPalpitacion;
+                textosSlots[i].transform.localScale = Vector3.one * ( factorIndividual);
+            }
+        }
+    }
+
     public void RegistrarJugador(FichaLobby nuevoJugador)
     {
         if (nuevoJugador.idJugador == 0)
@@ -89,15 +113,49 @@ public class LobbyManager : MonoBehaviour
             nuevoJugador.gameObject.SetActive(false);
             return;
         }
-        posicionesJugadores[idReal] = 0;
-        eleccionesPersonajes[idReal - 1] = 0;
-        AsignarPersonajeAlGestor(idReal, 0);
+
+        int slotInicialLibre = 0;
+        bool slotOcupado = true;
+
+        while (slotOcupado && slotInicialLibre < 5)
+        {
+            slotOcupado = false;
+            for (int id = 1; id < posicionesJugadores.Length; id++)
+            {
+                if (posicionesJugadores[id] == slotInicialLibre)
+                {
+                    slotOcupado = true;
+                    break;
+                }
+            }
+
+            if (slotOcupado)
+            {
+                slotInicialLibre++;
+            }
+        }
+
+        posicionesJugadores[idReal] = slotInicialLibre;
+        nuevoJugador.slotSeleccionado = slotInicialLibre;
+
+        eleccionesPersonajes[idReal - 1] = slotInicialLibre;
+        AsignarPersonajeAlGestor(idReal, slotInicialLibre);
+
         if (GestorVictorias.Instancia != null)
         {
             GestorVictorias.Instancia.RegistrarPersonajeEnTorneo(idReal, nuevoJugador.gameObject);
         }
+
         ReconstruirTextosDeSlots();
-        Debug.Log("Ingreso exitoso: Player " + idReal + " metido al Gestor de Victorias");
+
+        int indicePedestal = idReal - 1;
+        if (indicePedestal >= 0 && indicePedestal < pedestalesVisuales.Length && pedestalesVisuales[indicePedestal] != null)
+        {
+            // 🔥 CORRECCIÓN: Ahora pasa correctamente el parámetro idReal
+            pedestalesVisuales[indicePedestal].MostrarPersonajePorSlot(slotInicialLibre, idReal);
+        }
+
+        Debug.Log("Ingreso exitoso: Player " + idReal + " metido en el slot libre: " + slotInicialLibre);
     }
 
     public void ActualizarPunteroVisual(int idJugador, int slot)
@@ -114,6 +172,11 @@ public class LobbyManager : MonoBehaviour
         }
 
         ReconstruirTextosDeSlots();
+        int indicePedestal = idJugador - 1;
+        if (indicePedestal >= 0 && indicePedestal < pedestalesVisuales.Length && pedestalesVisuales[indicePedestal] != null)
+        {
+            pedestalesVisuales[indicePedestal].MostrarPersonajePorSlot(slot, idJugador);
+        }
     }
 
     private void AsignarPersonajeAlGestor(int idJugador, int slot)
@@ -130,26 +193,58 @@ public class LobbyManager : MonoBehaviour
 
     private void ReconstruirTextosDeSlots()
     {
-        int[] jugadoresEnCadaSlot = new int[4];
+        int[] jugadoresEnCadaSlot = new int[5];
+        int[] ultimoJugadorEnSlot = new int[5]; // Arreglo para registrar qué ID de jugador está en cada slot
+
+        for (int i = 0; i < 5; i++)
+        {
+            ultimoJugadorEnSlot[i] = -1;
+        }
+
         for (int i = 0; i < textosSlots.Count; i++)
         {
             if (textosSlots[i] != null) textosSlots[i].text = "";
         }
+
         for (int id = 1; id < posicionesJugadores.Length; id++)
         {
             int slot = posicionesJugadores[id];
             if (slot != -1 && slot < textosSlots.Count && textosSlots[slot] != null)
             {
                 textosSlots[slot].text = textosSlots[slot].text + "P" + id;
-                if (slot >= 0 && slot < jugadoresEnCadaSlot.Length) jugadoresEnCadaSlot[slot]++;
+
+                int indexColor = id - 1;
+                if (indexColor >= 0 && indexColor < coloresJugadores.Count)
+                {
+                    textosSlots[slot].color = coloresJugadores[indexColor];
+                }
+
+                if (slot >= 0 && slot < jugadoresEnCadaSlot.Length)
+                {
+                    jugadoresEnCadaSlot[slot]++;
+                    ultimoJugadorEnSlot[slot] = id; // Guardamos el ID del jugador asignado a este casillero
+                }
             }
         }
+
         for (int i = 0; i < slotsPersonajes.Count; i++)
         {
             if (slotsPersonajes[i] == null) continue;
             if (jugadoresEnCadaSlot[i] > 0)
             {
-                slotsPersonajes[i].color = colorSeleccionado;
+                // 🔥 ASIGNACIÓN DINÁMICA: Buscamos el color del jugador que está pisando el slot i
+                int idJugadorActivo = ultimoJugadorEnSlot[i];
+                int indexColorJugador = idJugadorActivo - 1;
+
+                if (indexColorJugador >= 0 && indexColorJugador < coloresJugadores.Count)
+                {
+                    slotsPersonajes[i].color = coloresJugadores[indexColorJugador];
+                }
+                else
+                {
+                    slotsPersonajes[i].color = colorSeleccionado;
+                }
+
                 slotsPersonajes[i].transform.localScale = new Vector3(escalaAumentada, escalaAumentada, 1f);
             }
             else
@@ -163,13 +258,46 @@ public class LobbyManager : MonoBehaviour
     public void ConfirmarJugador(int idJugador, int slotElegido)
     {
         if (idJugador <= 0 || idJugador > eleccionesPersonajes.Length) return;
+
+        if (slotElegido == 4)
+        {
+            Debug.Log("Proximamente......");
+            return;
+        }
+        int indicePedestal = idJugador - 1;
+        if (indicePedestal >= 0 && indicePedestal < pedestalesVisuales.Length && pedestalesVisuales[indicePedestal] != null)
+        {
+            pedestalesVisuales[indicePedestal].ActivarSaludo();
+        }
         eleccionesPersonajes[idJugador - 1] = slotElegido;
         AsignarPersonajeAlGestor(idJugador, slotElegido);
         jugadoresListos++;
+
         if (jugadoresListos >= limiteMaximoJugadores)
         {
             Debug.Log("Todos listos saltando a la escena de juego...");
+            if (MenuMinijuegosManager.MinijuegoElegido == 1)
+            {
+                Debug.Log("[Lobby] Interceptando variable de juego para cargar: JuegoExplosion");
+                escenaJUEGO = "JuegoExplosion";
+            }
+            else
+            {
+                Debug.Log("[Lobby] Manteniendo escena tradicional por defecto.");
+            }
             SceneManager.LoadScene(escenaJUEGO);
         }
+    }
+
+    public bool EstaSlotLibre(int slotAComprobar, int idJugadorConsultante)
+    {
+        for (int id = 1; id < posicionesJugadores.Length; id++)
+        {
+            if (id != idJugadorConsultante && posicionesJugadores[id] == slotAComprobar)
+            {
+                return false;
+            }
+        }
+        return true;
     }
 }
